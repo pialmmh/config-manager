@@ -1,13 +1,22 @@
 package com.telcobright.routesphere.startup;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.telcobright.routesphere.tenant.Tenant;
 import com.telcobright.routesphere.tenant.TenantHierarchy;
+import com.telcobright.routesphere.tenant.TenantMapper;
+import com.telcobright.routesphere.tenant.dto.ConfigManagerTenant;
 import io.quarkus.runtime.Startup;
 import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,11 +30,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 @ApplicationScoped
 @Startup
 public class TenantHierarchyInitializer {
-    
+
     @Inject
     TenantHierarchyService tenantHierarchyService;
     
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final AtomicInteger tenantCounter = new AtomicInteger(0);
+    
+    // ConfigManager API configuration
+    private static final String CONFIG_MANAGER_URL = System.getenv().getOrDefault(
+        "CONFIG_MANAGER_URL", "http://localhost:7070");
+    private static final String TENANT_API_ENDPOINT = "/get-tenant-root";
+    private static final boolean USE_MOCK_DATA = Boolean.parseBoolean(
+        System.getenv().getOrDefault("USE_MOCK_TENANT_DATA", "false"));
     
     /**
      * Initialize tenant hierarchy on application startup
@@ -36,7 +53,28 @@ public class TenantHierarchyInitializer {
         System.out.println(" Initializing Tenant Hierarchy");
         System.out.println("========================================\n");
         
-        TenantHierarchy hierarchy = initializeTenantHierarchy();
+        TenantHierarchy hierarchy;
+        
+        try {
+            // Try to load from ConfigManager API
+            hierarchy = loadFromConfigManager();
+            
+            if (hierarchy == null || hierarchy.getTenantCount() == 0) {
+                System.out.println("No tenants received from ConfigManager, using mock data");
+                hierarchy = initializeMockTenantHierarchy();
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to load from ConfigManager: " + e.getMessage());
+            
+            if (USE_MOCK_DATA) {
+                System.out.println("Falling back to mock data...");
+                hierarchy = initializeMockTenantHierarchy();
+            } else {
+                System.err.println("Mock data disabled. Starting with empty hierarchy.");
+                hierarchy = new TenantHierarchy();
+            }
+        }
+        
         tenantHierarchyService.setTenantHierarchy(hierarchy);
         
         System.out.println("\n========================================");
@@ -45,14 +83,74 @@ public class TenantHierarchyInitializer {
         System.out.println("========================================\n");
         
         // Print the hierarchy
-        hierarchy.printHierarchy();
+        if (hierarchy.getTenantCount() > 0) {
+            hierarchy.printHierarchy();
+        }
     }
     
     /**
-     * Custom logic to populate tenant hierarchy
-     * In production, this would load from database or configuration
+     * Load tenant hierarchy from ConfigManager API
      */
-    private TenantHierarchy initializeTenantHierarchy() {
+    private TenantHierarchy loadFromConfigManager() throws IOException {
+        String apiUrl = CONFIG_MANAGER_URL + TENANT_API_ENDPOINT;
+        System.out.println("Loading tenant hierarchy from: " + apiUrl);
+        
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpPost httpPost = new HttpPost(apiUrl);
+            httpPost.setHeader("Content-Type", "application/json");
+            httpPost.setHeader("Accept", "application/json");
+            
+            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+                int statusCode = response.getCode();
+                
+                if (statusCode == 200) {
+                    String responseBody = EntityUtils.toString(response.getEntity());
+                    
+                    // Parse JSON response to ConfigManagerTenant
+                    ConfigManagerTenant rootTenant = objectMapper.readValue(
+                        responseBody, ConfigManagerTenant.class);
+                    
+                    System.out.println("Successfully received tenant hierarchy from ConfigManager");
+                    System.out.println("Root tenant: " + rootTenant.getDbName());
+                    
+                    // Convert to RouteSphere TenantHierarchy
+                    TenantHierarchy hierarchy = TenantMapper.mapToTenantHierarchy(rootTenant);
+                    
+                    // Log statistics
+                    logTenantStatistics(hierarchy);
+                    
+                    return hierarchy;
+                } else {
+                    System.err.println("ConfigManager API returned status: " + statusCode);
+                    return null;
+                }
+            } catch (Exception e) {
+                throw new IOException("Failed to parse response from ConfigManager: " + e.getMessage(), e);
+            }
+        }
+    }
+    
+    /**
+     * Log tenant hierarchy statistics
+     */
+    private void logTenantStatistics(TenantHierarchy hierarchy) {
+        System.out.println("\nTenant Hierarchy Statistics:");
+        
+        for (Tenant.TenantLevel level : Tenant.TenantLevel.values()) {
+            List<Tenant> tenantsAtLevel = hierarchy.getTenantsByLevel(level);
+            if (tenantsAtLevel != null && !tenantsAtLevel.isEmpty()) {
+                System.out.println(String.format("  %s: %d tenants",
+                    TenantMapper.getTenantTypeName(level),
+                    tenantsAtLevel.size()));
+            }
+        }
+    }
+    
+    /**
+     * Initialize mock tenant hierarchy for testing
+     * Used when ConfigManager is not available
+     */
+    private TenantHierarchy initializeMockTenantHierarchy() {
         TenantHierarchy hierarchy = new TenantHierarchy();
         
         // Create ROOT tenant
