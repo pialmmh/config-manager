@@ -4,10 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.telcobright</groupId>
-    <artifactId>routesphere</artifactId>
+    <artifactId>routesphere-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>crossroad-rtc (parent)</name>
+    <name>RouteSphere Parent</name>
+    <description>Parent project with shared utilities and configuration for RouteSphere modules</description>
 
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
@@ -83,6 +84,7 @@
 
     <!-- Add your real module folders here -->
     <modules>
+        <module>routesphere-core</module>
         <module>statemachine</module>
         <module>partitioned-repo</module>
         <module>infinite-scheduler</module>
