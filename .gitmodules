@@ -1,0 +1,15 @@
+[submodule "statemachine"]
+	path = statemachine
+	url = git@github.com:pialmmh/statemachine.git
+[submodule "infinite-scheduler"]
+	path = infinite-scheduler
+	url = git@github.com:pialmmh/infinite-scheduler.git
+[submodule "partitioned-repo"]
+	path = partitioned-repo
+	url = git@github.com:pialmmh/partitioned-repo.git
+[submodule "chronicle-db-Cache"]
+	path = chronicle-db-Cache
+	url = git@github.com:Bishal16/chronicle-db-Cache.git
+[submodule "RTC-Manager"]
+	path = RTC-Manager
+	url = git@github.com:telcobright/RTC-Manager.git
