@@ -1,0 +1,234 @@
+# Quarkus Development Configuration for RouteSphere
+# This file configures the DEV profile
+
+quarkus:
+  http:
+    port: 8081
+    host: 0.0.0.0
+  
+  log:
+    level: INFO
+    category:
+      "com.telcobright.routesphere":
+        level: DEBUG
+
+# RouteSphere Tenant Configuration
+routesphere:
+  tenant:
+    id: "telcobright_root"
+    name: "TelcoBright Root Organization"
+    type: "ROOT"
+    active-profile: "dev"
+    active: true
+    
+    profiles:
+      # Development Profile
+      dev:
+        name: "development"
+        active: true
+        
+        # General Configuration (Database, Kafka, etc.)
+        general:
+          database:
+            type: "mysql"
+            host: "127.0.0.1"
+            port: 3306
+            name: "routesphere_dev"
+            username: "root"
+            password: "123456"
+            url: "jdbc:mysql://127.0.0.1:3306/routesphere_dev"
+            pool:
+              min-size: 5
+              max-size: 20
+              initial-size: 10
+              max-lifetime: "30m"
+              idle-timeout: "10m"
+            properties:
+              serverTimezone: "UTC"
+              useSSL: "false"
+              allowPublicKeyRetrieval: "true"
+          
+          kafka:
+            bootstrap-servers: "localhost:9092"
+            group-id: "routesphere-dev"
+            topics:
+              cdr: "cdr-dev"
+              events: "events-dev"
+              billing: "billing-dev"
+              routing: "routing-dev"
+            producer:
+              acks: "all"
+              retries: 3
+              batch-size: 16384
+              linger-ms: 10
+              compression-type: "snappy"
+            consumer:
+              auto-offset-reset: "earliest"
+              enable-auto-commit: false
+              max-poll-records: 500
+              session-timeout-ms: 30000
+          
+          redis:
+            host: "localhost"
+            port: 6379
+            database: 0
+            timeout: "5s"
+            pool:
+              max-total: 50
+              max-idle: 10
+              min-idle: 5
+          
+          config-manager:
+            base-url: "http://localhost:7070"
+            tenant-endpoint: "/get-tenant-root"
+            timeout: "30s"
+            retry:
+              max-attempts: 3
+              delay: "1s"
+              max-delay: "10s"
+          
+          monitoring:
+            metrics:
+              enabled: true
+              export-interval: "30s"
+              prometheus-endpoint: "/metrics"
+            health:
+              enabled: true
+              liveness-path: "/health/live"
+              readiness-path: "/health/ready"
+            logging:
+              level: "DEBUG"
+              format: "json"
+              file-path: "/var/log/routesphere/dev.log"
+        
+        # Socket Configurations (Protocol Instances)
+        sockets:
+          # SIP External Profile
+          sip-external:
+            name: "sip-external"
+            protocol: "SIP"
+            enabled: true
+            network:
+              bind-address: "0.0.0.0"
+              bind-port: 5060
+              external-ip: "203.0.113.1"
+              external-port: 5060
+              transport: "UDP"
+              limits:
+                max-connections: 10000
+                max-connections-per-ip: 100
+                connection-timeout: "60s"
+                rate-limit: 100
+            security:
+              auth:
+                type: "digest"
+                realm: "routesphere.dev"
+                require-auth: true
+                auth-methods: "INVITE,REGISTER"
+                nonce-ttl: "300s"
+              access:
+                allow-networks: "0.0.0.0/0"
+                require-registration: false
+            settings:
+              user-agent: "RouteSphere/1.0-DEV"
+              max-forwards: "70"
+              session-expires: "1800"
+              min-session-expires: "90"
+          
+          # SIP Internal Profile
+          sip-internal:
+            name: "sip-internal"
+            protocol: "SIP"
+            enabled: true
+            network:
+              bind-address: "127.0.0.1"
+              bind-port: 5080
+              transport: "TCP"
+              limits:
+                max-connections: 5000
+                connection-timeout: "30s"
+            security:
+              auth:
+                type: "digest"
+                realm: "internal.routesphere.dev"
+                require-auth: false
+              access:
+                allow-networks: "127.0.0.0/8,10.0.0.0/8,192.168.0.0/16"
+            settings:
+              user-agent: "RouteSphere-Internal/1.0-DEV"
+              
+          # HTTP REST API Profile
+          http-rest:
+            name: "http-rest"
+            protocol: "HTTP"
+            enabled: true
+            network:
+              bind-address: "0.0.0.0"
+              bind-port: 8080
+              transport: "TCP"
+              limits:
+                max-connections: 1000
+                connection-timeout: "30s"
+                idle-timeout: "60s"
+                rate-limit: 1000
+            settings:
+              cors-enabled: "true"
+              cors-origins: "*"
+              max-request-size: "10MB"
+              compression-enabled: "true"
+          
+          # SMS Gateway Profile
+          sms-gateway:
+            name: "sms-gateway"
+            protocol: "SMS"
+            enabled: true
+            network:
+              bind-address: "0.0.0.0"
+              bind-port: 8090
+              transport: "TCP"
+            settings:
+              provider: "twilio"
+              api-version: "v2"
+              max-message-length: "1600"
+              concatenation-enabled: "true"
+          
+          # FreeSWITCH ESL Profile
+          esl-freeswitch:
+            name: "esl-freeswitch"
+            protocol: "ESL"
+            enabled: true
+            network:
+              bind-address: "127.0.0.1"
+              bind-port: 8021
+              transport: "TCP"
+            security:
+              auth:
+                type: "password"
+                require-auth: true
+            settings:
+              password: "ClueCon"
+              event-filter: "CHANNEL_CREATE,CHANNEL_ANSWER,CHANNEL_HANGUP"
+              
+      # Mock Profile for Testing
+      mock:
+        name: "mock"
+        active: false
+        general:
+          database:
+            type: "h2"
+            url: "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"
+            username: "sa"
+            password: ""
+          kafka:
+            bootstrap-servers: "mock:9092"
+            group-id: "routesphere-mock"
+          config-manager:
+            base-url: "http://mock:8080"
+        sockets:
+          sip-mock:
+            name: "sip-mock"
+            protocol: "SIP"
+            enabled: true
+            network:
+              bind-address: "127.0.0.1"
+              bind-port: 15060

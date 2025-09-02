@@ -1,0 +1,221 @@
+# CCL Production Profile Configuration
+# Production environment settings for CCL tenant
+
+routesphere:
+  tenant:
+    profiles:
+      ccl-prod:
+        name: "CCL Production"
+        active: false
+        environment: "production"
+        
+        # General Configuration for CCL Production
+        general:
+          # CCL Production Database (High Availability)
+          database:
+            type: "mysql"
+            host: "${CCL_DB_HOST:ccl-db.production.local}"
+            port: ${CCL_DB_PORT:3306}
+            name: "${CCL_DB_NAME:ccl_prod}"
+            username: "${CCL_DB_USER:ccl_prod}"
+            password: "${CCL_DB_PASSWORD}"
+            url: "jdbc:mysql://${CCL_DB_HOST:ccl-db.production.local}:${CCL_DB_PORT:3306}/${CCL_DB_NAME:ccl_prod}"
+            pool:
+              min-size: 20
+              max-size: 100
+              initial-size: 30
+              max-lifetime: "30m"
+              idle-timeout: "5m"
+            properties:
+              serverTimezone: "UTC"
+              useSSL: "true"
+              requireSSL: "true"
+              verifyServerCertificate: "true"
+              autoReconnect: "true"
+              failOverReadOnly: "false"
+          
+          # CCL Production Kafka Cluster
+          kafka:
+            bootstrap-servers: "${CCL_KAFKA_SERVERS:kafka1.ccl.prod:9092,kafka2.ccl.prod:9092,kafka3.ccl.prod:9092}"
+            group-id: "ccl-prod-${INSTANCE_ID:1}"
+            topics:
+              cdr: "ccl-prod-cdr"
+              events: "ccl-prod-events"
+              billing: "ccl-prod-billing"
+              routing: "ccl-prod-routing"
+            producer:
+              acks: "all"
+              retries: 5
+              batch-size: 32768
+              linger-ms: 20
+              compression-type: "lz4"
+              idempotence: "true"
+            consumer:
+              auto-offset-reset: "latest"
+              enable-auto-commit: false
+              max-poll-records: 1000
+              session-timeout-ms: 60000
+            security:
+              protocol: "SASL_SSL"
+              sasl-mechanism: "PLAIN"
+              sasl-jaas-config: "${CCL_KAFKA_SASL_CONFIG}"
+          
+          # CCL Production Redis Cluster
+          redis:
+            host: "${CCL_REDIS_HOST:redis.ccl.prod}"
+            port: ${CCL_REDIS_PORT:6379}
+            password: "${CCL_REDIS_PASSWORD}"
+            database: 0
+            timeout: "2s"
+            pool:
+              max-total: 200
+              max-idle: 50
+              min-idle: 20
+            cluster:
+              nodes: "${CCL_REDIS_CLUSTER:redis1.ccl.prod:6379,redis2.ccl.prod:6379,redis3.ccl.prod:6379}"
+              max-redirects: 3
+          
+          # ConfigManager for CCL Production
+          config-manager:
+            base-url: "${CCL_CONFIG_MANAGER_URL:https://config.ccl.prod}"
+            tenant-endpoint: "/api/v1/tenant/ccl"
+            timeout: "10s"
+            auth:
+              type: "bearer"
+              token: "${CCL_CONFIG_MANAGER_TOKEN}"
+            retry:
+              max-attempts: 5
+              delay: "2s"
+              max-delay: "30s"
+          
+          # Production Monitoring
+          monitoring:
+            metrics:
+              enabled: true
+              export-interval: "10s"
+              prometheus-endpoint: "/metrics"
+            health:
+              enabled: true
+              liveness-path: "/health/live"
+              readiness-path: "/health/ready"
+            logging:
+              level: "INFO"
+              format: "json"
+              file-path: "/var/log/ccl/routesphere-prod.log"
+        
+        # CCL Production Socket Configurations
+        sockets:
+          # CCL SIP Production Profile - Primary
+          ccl-sip-prod-primary:
+            name: "ccl-sip-prod-primary"
+            protocol: "SIP"
+            enabled: true
+            network:
+              bind-address: "${CCL_SIP_PRIMARY_IP:10.50.1.10}"
+              bind-port: ${CCL_SIP_PRIMARY_PORT:5060}
+              external-ip: "${CCL_PUBLIC_IP:203.95.220.100}"
+              external-port: ${CCL_PUBLIC_SIP_PORT:5060}
+              transport: "UDP,TCP,TLS"
+              limits:
+                max-connections: 5000  # CCL's contracted limit
+                max-connections-per-ip: 100
+                connection-timeout: "120s"
+                idle-timeout: "300s"
+                rate-limit: 500  # Calls per second limit for CCL
+            security:
+              tls:
+                enabled: true
+                cert-file: "/etc/ccl/certs/sip.crt"
+                key-file: "/etc/ccl/certs/sip.key"
+                ca-file: "/etc/ccl/certs/ca.crt"
+                verify-client: false
+                protocols: "TLSv1.2,TLSv1.3"
+              auth:
+                type: "digest"
+                realm: "ccl.com"
+                require-auth: true
+                auth-methods: "INVITE,REGISTER,SUBSCRIBE"
+                nonce-ttl: "600s"
+              access:
+                allow-networks: "${CCL_ALLOWED_NETWORKS:203.95.220.0/24,10.50.0.0/16}"
+                deny-ips: "${CCL_BLOCKED_IPS:}"
+                require-registration: true
+            settings:
+              user-agent: "CCL-VoIP/2.0-PROD"
+              max-forwards: "70"
+              session-expires: "3600"
+              min-session-expires: "180"
+              codec-preference: "G729,G711,OPUS"
+              rtp-port-range: "10000-20000"
+              
+          # CCL SIP Production Profile - Secondary (Backup)
+          ccl-sip-prod-secondary:
+            name: "ccl-sip-prod-secondary"
+            protocol: "SIP"
+            enabled: true
+            network:
+              bind-address: "${CCL_SIP_SECONDARY_IP:10.50.2.10}"
+              bind-port: ${CCL_SIP_SECONDARY_PORT:5060}
+              external-ip: "${CCL_BACKUP_PUBLIC_IP:203.95.220.101}"
+              external-port: ${CCL_BACKUP_SIP_PORT:5060}
+              transport: "UDP,TCP,TLS"
+              limits:
+                max-connections: 5000
+                rate-limit: 500
+            settings:
+              role: "backup"
+              failover-priority: "2"
+          
+          # CCL HTTPS REST API Production
+          ccl-https-prod:
+            name: "ccl-https-prod"
+            protocol: "HTTPS"
+            enabled: true
+            network:
+              bind-address: "0.0.0.0"
+              bind-port: 8443
+              transport: "TCP"
+              limits:
+                max-connections: 1000
+                connection-timeout: "30s"
+                idle-timeout: "300s"
+                rate-limit: 1000  # API calls per second for CCL
+            security:
+              tls:
+                enabled: true
+                cert-file: "/etc/ccl/certs/api.crt"
+                key-file: "/etc/ccl/certs/api.key"
+                protocols: "TLSv1.2,TLSv1.3"
+                ciphers: "HIGH:!aNULL:!MD5"
+              auth:
+                type: "bearer"
+                require-auth: true
+              access:
+                allow-networks: "${CCL_API_ALLOWED_IPS:0.0.0.0/0}"
+            settings:
+              cors-enabled: "true"
+              cors-origins: "https://portal.ccl.com,https://api.ccl.com"
+              max-request-size: "50MB"
+              compression-enabled: "true"
+              api-prefix: "/api/v2/ccl"
+              rate-limit-per-key: "true"
+              
+          # CCL SMS Gateway Production
+          ccl-sms-prod:
+            name: "ccl-sms-prod"
+            protocol: "SMS"
+            enabled: true
+            network:
+              bind-address: "${CCL_SMS_IP:10.50.3.10}"
+              bind-port: ${CCL_SMS_PORT:8090}
+              transport: "TCP"
+            settings:
+              provider: "twilio"
+              account-sid: "${CCL_TWILIO_ACCOUNT_SID}"
+              auth-token: "${CCL_TWILIO_AUTH_TOKEN}"
+              from-numbers: "${CCL_SMS_FROM_NUMBERS:+8801711000000,+8801711000001}"
+              max-message-length: "1600"
+              concatenation-enabled: "true"
+              delivery-report: "true"
+              retry-failed: "true"
+              max-retries: "3"

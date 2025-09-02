@@ -1,0 +1,35 @@
+# CCL (Client) Tenant Configuration
+# CCL is one of RouteSphere's clients - a telecommunications company
+
+routesphere:
+  tenant:
+    id: "ccl"
+    name: "CCL Communications Ltd"
+    type: "END_USER"  # CCL is an end customer/client
+    parent-id: "telcobright_root"
+    db-name: "ccl"  # Database name from ConfigManager
+    active: true
+    
+    # Tenant-level metadata (applies to all profiles)
+    metadata:
+      company-type: "Telecommunications Provider"
+      contract-id: "CTR-2024-CCL-001"
+      sla-level: "PLATINUM"
+      billing-type: "POSTPAID"
+      credit-limit: "50000"
+      currency: "USD"
+      timezone: "Asia/Dhaka"
+      contact-email: "ops@ccl.com"
+      contact-phone: "+8801711000000"
+      account-manager: "John Smith"
+      onboarding-date: "2024-01-15"
+      
+    # Tenant-specific settings
+    settings:
+      max-concurrent-calls: "5000"
+      max-daily-calls: "100000"
+      allowed-destinations: "BD,IN,US,UK,CA"
+      blocked-destinations: "CU,IR,KP"
+      call-recording: "true"
+      transcoding-enabled: "true"
+      preferred-codecs: "G729,G711,OPUS"

@@ -1,0 +1,38 @@
+# KAFKA SERVER CONFIGURATION CHANGES NEEDED
+# File: /opt/kafka/config/server.properties (or wherever Kafka is installed)
+
+# CHANGE FROM (wrong):
+listeners=PLAINTEXT://localhost:9092
+advertised.listeners=PLAINTEXT://localhost:9092
+
+# CHANGE TO (correct):
+listeners=PLAINTEXT://0.0.0.0:9092
+advertised.listeners=PLAINTEXT://103.95.96.76:9092
+
+# Explanation:
+# - listeners: Interface Kafka binds to (0.0.0.0 means all interfaces)
+# - advertised.listeners: What Kafka tells clients to connect to
+
+# Additional recommended settings:
+
+# The broker id (must be unique in cluster)
+broker.id=1
+
+# Zookeeper connection (if not already set)
+zookeeper.connect=localhost:2181  # Or actual Zookeeper address
+
+# Allow deletion of topics (optional)
+delete.topic.enable=true
+
+# Log retention (optional)
+log.retention.hours=168
+log.segment.bytes=1073741824
+
+# Network and IO threads (for performance)
+num.network.threads=8
+num.io.threads=8
+
+# Socket buffer sizes
+socket.send.buffer.bytes=102400
+socket.receive.buffer.bytes=102400
+socket.request.max.bytes=104857600

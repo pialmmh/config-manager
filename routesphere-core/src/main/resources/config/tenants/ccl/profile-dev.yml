@@ -1,0 +1,128 @@
+# CCL Development Profile Configuration
+# Development environment settings for CCL tenant
+
+routesphere:
+  tenant:
+    profiles:
+      ccl-dev:
+        name: "CCL Development"
+        active: true
+        environment: "development"
+        
+        # General Configuration for CCL Dev
+        general:
+          # CCL Development Database
+          database:
+            type: "mysql"
+            host: "103.95.96.77"
+            port: 3306
+            name: "ccl_dev"
+            username: "tbuser"
+            password: "Takay1takaane$"
+            url: "jdbc:mysql://103.95.96.77:3306/telcobright"
+            pool:
+              min-size: 2
+              max-size: 10
+              initial-size: 5
+            properties:
+              serverTimezone: "UTC"
+              useSSL: "false"
+              allowPublicKeyRetrieval: "true"
+          
+          # CCL Dev Kafka Configuration
+          kafka:
+            bootstrap-servers: "103.95.96.76:9092"
+            group-id: "ccl-dev"
+            topics:
+              cdr: "ccl-dev-cdr"
+              events: "ccl-dev-events"
+              billing: "ccl-dev-billing"
+              routing: "ccl-dev-routing"
+            producer:
+              acks: "1"
+              retries: 1
+              batch-size: 8192
+            consumer:
+              auto-offset-reset: "earliest"
+              enable-auto-commit: true
+          
+          # CCL Dev Redis
+          redis:
+            host: "localhost"
+            port: 6379
+            database: 2  # CCL uses database 2 in dev
+            timeout: "5s"
+            pool:
+              max-total: 20
+              max-idle: 5
+          
+          # ConfigManager for CCL Dev
+          config-manager:
+            base-url: "http://localhost:7070"
+            tenant-endpoint: "/api/v1/tenant/ccl"
+            timeout: "30s"
+          
+          # Monitoring (relaxed for dev)
+          monitoring:
+            metrics:
+              enabled: false
+            health:
+              enabled: true
+            logging:
+              level: "DEBUG"
+              format: "text"
+              file-path: "/var/log/routesphere/ccl-dev.log"
+        
+        # CCL Development Socket Configurations
+        sockets:
+          # CCL SIP Development Profile
+          ccl-sip-dev:
+            name: "ccl-sip-dev"
+            protocol: "SIP"
+            enabled: true
+            network:
+              bind-address: "127.0.0.1"
+              bind-port: 15060  # CCL dev uses port 15060
+              transport: "UDP,TCP"
+              limits:
+                max-connections: 100
+                connection-timeout: "30s"
+                rate-limit: 10
+            security:
+              auth:
+                type: "digest"
+                realm: "ccl-dev.local"
+                require-auth: false  # Relaxed for dev
+            settings:
+              user-agent: "CCL-Dev/1.0"
+              max-forwards: "70"
+              registration-required: "false"
+              
+          # CCL HTTP API Development
+          ccl-http-dev:
+            name: "ccl-http-dev"
+            protocol: "HTTP"
+            enabled: true
+            network:
+              bind-address: "127.0.0.1"
+              bind-port: 18080  # CCL dev API on 18080
+              limits:
+                max-connections: 50
+                rate-limit: 100
+            settings:
+              cors-enabled: "true"
+              cors-origins: "*"
+              api-prefix: "/api/v1/ccl"
+              swagger-enabled: "true"
+              
+          # CCL SMS Gateway Dev
+          ccl-sms-dev:
+            name: "ccl-sms-dev"
+            protocol: "SMS"
+            enabled: false  # Disabled in dev
+            network:
+              bind-address: "127.0.0.1"
+              bind-port: 18090
+            settings:
+              provider: "mock"
+              test-mode: "true"

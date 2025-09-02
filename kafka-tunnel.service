@@ -1,0 +1,32 @@
+[Unit]
+Description=SSH Tunnel for Kafka
+After=network.target
+
+[Service]
+Type=simple
+User=mustafa
+ExecStart=/usr/bin/ssh -N -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -o ExitOnForwardFailure=yes -L 9092:localhost:9092 root@103.95.96.76
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+
+# Installation instructions:
+# 1. Copy this file to systemd:
+#    sudo cp kafka-tunnel.service /etc/systemd/system/
+#
+# 2. Set up SSH key authentication (if not already done):
+#    ssh-keygen -t rsa -b 4096
+#    ssh-copy-id root@103.95.96.76
+#
+# 3. Reload systemd and start service:
+#    sudo systemctl daemon-reload
+#    sudo systemctl enable kafka-tunnel.service
+#    sudo systemctl start kafka-tunnel.service
+#
+# 4. Check status:
+#    sudo systemctl status kafka-tunnel.service
+#
+# 5. View logs:
+#    sudo journalctl -u kafka-tunnel.service -f

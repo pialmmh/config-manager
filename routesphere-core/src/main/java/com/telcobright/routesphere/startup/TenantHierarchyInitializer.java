@@ -1,6 +1,8 @@
 package com.telcobright.routesphere.startup;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.telcobright.routesphere.config.GlobalConfigService;
+import com.telcobright.routesphere.config.deployment.DeploymentConfigService;
 import com.telcobright.routesphere.tenant.Tenant;
 import com.telcobright.routesphere.tenant.TenantHierarchy;
 import com.telcobright.routesphere.tenant.TenantMapper;
@@ -28,49 +30,63 @@ import java.util.concurrent.atomic.AtomicInteger;
  * This runs at application startup and populates the tenant structure
  */
 @ApplicationScoped
-@Startup
 public class TenantHierarchyInitializer {
 
     @Inject
     TenantHierarchyService tenantHierarchyService;
     
+    @Inject
+    GlobalConfigService globalConfig;
+    
+    @Inject
+    DeploymentConfigService deploymentConfig;
+    
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final AtomicInteger tenantCounter = new AtomicInteger(0);
     
-    // ConfigManager API configuration
-    private static final String CONFIG_MANAGER_URL = System.getenv().getOrDefault(
-        "CONFIG_MANAGER_URL", "http://localhost:7070");
+    // API endpoint path
     private static final String TENANT_API_ENDPOINT = "/get-tenant-root";
-    private static final boolean USE_MOCK_DATA = Boolean.parseBoolean(
-        System.getenv().getOrDefault("USE_MOCK_TENANT_DATA", "false"));
     
     /**
      * Initialize tenant hierarchy on application startup
-     * @param event Quarkus startup event
+     * @paramevent Quarkus startup event
      */
-    void onStart(@Observes StartupEvent event) {
+     public void onStart() {
         System.out.println("\n========================================");
         System.out.println(" Initializing Tenant Hierarchy");
         System.out.println("========================================\n");
         
         TenantHierarchy hierarchy;
         
+        // Get active tenant and profile from global config
+        String activeTenant = globalConfig.getActiveTenant();
+        String activeProfile = globalConfig.getActiveProfile();
+        
+        System.out.println("Active Tenant: " + activeTenant);
+        System.out.println("Active Profile: " + activeProfile);
+        
         try {
-            // Try to load from ConfigManager API
-            hierarchy = loadFromConfigManager();
-            
-            if (hierarchy == null || hierarchy.getTenantCount() == 0) {
-                System.out.println("No tenants received from ConfigManager, using mock data");
+            if ("mock".equals(activeProfile)) {
+                // Use mock data for mock profile
+                System.out.println("Using mock data for profile: " + activeProfile);
                 hierarchy = initializeMockTenantHierarchy();
+            } else {
+                // Try to load from ConfigManager API using configured URL
+                hierarchy = loadFromConfigManager();
+                
+                if (hierarchy == null || hierarchy.getTenantCount() == 0) {
+                    System.out.println("No tenants received from ConfigManager, using mock data");
+                    hierarchy = initializeMockTenantHierarchy();
+                }
             }
         } catch (Exception e) {
             System.err.println("Failed to load from ConfigManager: " + e.getMessage());
             
-            if (USE_MOCK_DATA) {
-                System.out.println("Falling back to mock data...");
+            if ("dev".equals(activeProfile) || "mock".equals(activeProfile)) {
+                System.out.println("Falling back to mock data for " + activeProfile + " profile");
                 hierarchy = initializeMockTenantHierarchy();
             } else {
-                System.err.println("Mock data disabled. Starting with empty hierarchy.");
+                System.err.println("Production/Staging mode - Starting with empty hierarchy.");
                 hierarchy = new TenantHierarchy();
             }
         }
@@ -92,8 +108,13 @@ public class TenantHierarchyInitializer {
      * Load tenant hierarchy from ConfigManager API
      */
     private TenantHierarchy loadFromConfigManager() throws IOException {
-        String apiUrl = CONFIG_MANAGER_URL + TENANT_API_ENDPOINT;
-        System.out.println("Loading tenant hierarchy from: " + apiUrl);
+        // Get ConfigManager URL from deployment configuration
+        String configManagerUrl = deploymentConfig.getConfigManagerUrl();
+        String apiUrl = configManagerUrl + TENANT_API_ENDPOINT;
+        
+        System.out.println("Loading tenant hierarchy from ConfigManager");
+        System.out.println("  URL: " + apiUrl);
+        System.out.println("  Database: " + deploymentConfig.getDatabaseConfig().getUrl());
         
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpPost httpPost = new HttpPost(apiUrl);
@@ -115,6 +136,15 @@ public class TenantHierarchyInitializer {
                     
                     // Convert to RouteSphere TenantHierarchy
                     TenantHierarchy hierarchy = TenantMapper.mapToTenantHierarchy(rootTenant);
+                    
+                    // Update root tenant name to match active tenant from global config
+                    String activeTenantName = globalConfig.getActiveTenant();
+                    Tenant root = hierarchy.getRootTenant();
+                    if (root != null) {
+                        root.setTenantId(activeTenantName);
+                        root.setTenantName(activeTenantName + " Organization");
+                        System.out.println("Updated root tenant to: " + activeTenantName);
+                    }
                     
                     // Log statistics
                     logTenantStatistics(hierarchy);
@@ -153,8 +183,9 @@ public class TenantHierarchyInitializer {
     private TenantHierarchy initializeMockTenantHierarchy() {
         TenantHierarchy hierarchy = new TenantHierarchy();
         
-        // Create ROOT tenant
-        Tenant rootTenant = createRootTenant();
+        // Create ROOT tenant with name from global config
+        String activeTenantName = globalConfig.getActiveTenant();
+        Tenant rootTenant = createRootTenant(activeTenantName);
         hierarchy.addTenant(rootTenant);
         
         // Create Level 1 Resellers (Major Partners)
@@ -194,10 +225,11 @@ public class TenantHierarchyInitializer {
     }
     
     /**
-     * Create root tenant
+     * Create root tenant with the active tenant name from global config
      */
-    private Tenant createRootTenant() {
-        Tenant root = new Tenant("root", "RouteSphere Master", Tenant.TenantLevel.ROOT);
+    private Tenant createRootTenant(String tenantName) {
+        // Use the tenant name from global config as the root tenant ID and name
+        Tenant root = new Tenant(tenantName, tenantName + " Organization", Tenant.TenantLevel.ROOT);
         root.setStatus(Tenant.TenantStatus.ACTIVE);
         
         // Add root tenant properties
@@ -206,7 +238,7 @@ public class TenantHierarchyInitializer {
         root.addProperty("global_rate_limit", "10000");
         root.addProperty("api_version", "v2");
         
-        System.out.println("Created ROOT tenant: " + root.getTenantName());
+        System.out.println("Created ROOT tenant: " + root.getTenantName() + " (ID: " + root.getTenantId() + ")");
         return root;
     }
     

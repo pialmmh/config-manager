@@ -1,0 +1,53 @@
+# CCL Staging Profile Configuration
+# Pre-production testing environment for CCL
+
+routesphere:
+  tenant:
+    profiles:
+      ccl-staging:
+        name: "CCL Staging"
+        active: false
+        environment: "staging"
+        
+        general:
+          database:
+            type: "mysql"
+            host: "staging-db.ccl.local"
+            port: 3306
+            name: "ccl_staging"
+            username: "ccl_staging"
+            password: "${CCL_STAGING_DB_PASSWORD}"
+            url: "jdbc:mysql://staging-db.ccl.local:3306/ccl_staging"
+            pool:
+              min-size: 10
+              max-size: 50
+          
+          kafka:
+            bootstrap-servers: "kafka-staging.ccl.local:9092"
+            group-id: "ccl-staging"
+            topics:
+              cdr: "ccl-staging-cdr"
+              events: "ccl-staging-events"
+          
+          redis:
+            host: "redis-staging.ccl.local"
+            port: 6379
+            database: 1
+          
+          config-manager:
+            base-url: "https://config-staging.ccl.local"
+            tenant-endpoint: "/api/v1/tenant/ccl"
+        
+        sockets:
+          ccl-sip-staging:
+            name: "ccl-sip-staging"
+            protocol: "SIP"
+            enabled: true
+            network:
+              bind-address: "10.60.1.10"
+              bind-port: 5060
+              limits:
+                max-connections: 1000
+                rate-limit: 100
+            settings:
+              user-agent: "CCL-Staging/1.0"

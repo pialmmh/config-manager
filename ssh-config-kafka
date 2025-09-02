@@ -1,0 +1,24 @@
+# Add this to ~/.ssh/config for permanent Kafka tunnel setup
+
+Host kafka-tunnel
+    HostName 103.95.96.76
+    User root
+    LocalForward 9092 localhost:9092
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    
+# Usage:
+# ssh -N kafka-tunnel
+# Or run in background:
+# ssh -N -f kafka-tunnel
+
+# For multiple services, add more LocalForward lines:
+Host services-tunnel
+    HostName 103.95.96.76
+    User root
+    LocalForward 9092 localhost:9092        # Kafka
+    LocalForward 2181 localhost:2181        # Zookeeper
+    LocalForward 3306 127.0.0.1:3306        # MySQL
+    LocalForward 6379 localhost:6379        # Redis
+    ServerAliveInterval 60
+    ServerAliveCountMax 3

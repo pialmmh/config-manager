@@ -1,0 +1,55 @@
+# CCL Mock Profile Configuration
+# For unit testing and CI/CD pipelines
+
+routesphere:
+  tenant:
+    profiles:
+      ccl-mock:
+        name: "CCL Mock/Test"
+        active: false
+        environment: "mock"
+        
+        general:
+          # In-memory database for testing
+          database:
+            type: "h2"
+            url: "jdbc:h2:mem:ccl_test;DB_CLOSE_DELAY=-1"
+            username: "sa"
+            password: ""
+            pool:
+              min-size: 1
+              max-size: 5
+          
+          # Mock Kafka
+          kafka:
+            bootstrap-servers: "mock:9092"
+            group-id: "ccl-mock"
+            topics:
+              cdr: "ccl-mock-cdr"
+              events: "ccl-mock-events"
+          
+          # No Redis in mock
+          redis:
+            host: "mock"
+            port: 6379
+            database: 15
+          
+          # Mock ConfigManager
+          config-manager:
+            base-url: "http://mock:8080"
+            tenant-endpoint: "/mock/tenant/ccl"
+        
+        sockets:
+          ccl-sip-mock:
+            name: "ccl-sip-mock"
+            protocol: "SIP"
+            enabled: true
+            network:
+              bind-address: "127.0.0.1"
+              bind-port: 25060
+              limits:
+                max-connections: 10
+            settings:
+              mock-mode: "true"
+              auto-answer: "true"
+              test-numbers: "+8801711111111,+8801722222222"
