@@ -1,0 +1,42 @@
+EslCallMachine
+
+initial: Admission
+states:
+	Admission: 
+		on: Entry
+			performAdmission()
+		on: AdmissionSuccess
+			startSchedularForPeriodicBalanceReserve()
+			uidTransferToFreeSwitch()
+			transition: Trying
+		on: AdmissionFailed
+			transion: HungUp
+		on: Hangup
+			transion: HungUp
+	Trying:
+		on: Ring
+			transion: Ringing
+		on: Hangup
+			transion: HungUp
+	Ringing:
+		on: Answer
+			transition: Connected
+		on: Hangup
+			transion: HungUp
+	Connected:
+		on: Hangup
+			transion: HungUp
+		on: BalanceReserveFailure
+			transition: HungUp
+	HungUp:
+		on: Exit
+			finalizeRating()
+			generateCdr()
+			
+		
+		
+	
+	
+	
+		
+		
