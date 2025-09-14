@@ -1,6 +1,6 @@
 package com.telcobright.routesphere.configmanager.resource;
 
-import com.telcobright.routesphere.configmanager.model.ConfigTenant;
+import com.telcobright.rtc.domainmodel.nonentity.Tenant;
 import com.telcobright.routesphere.configmanager.model.GlobalTenantRegistry;
 import com.telcobright.routesphere.configmanager.service.ConfigManagerService;
 import jakarta.inject.Inject;
@@ -32,7 +32,7 @@ public class ConfigManagerResource {
     @Path("/get-tenant-root")
     public Response getTenantRoot() {
         try {
-            ConfigTenant rootTenant = configManagerService.getRootTenant();
+            Tenant rootTenant = configManagerService.getRootTenant();
             if (rootTenant != null) {
                 LOG.infof("Returning root tenant: %s", rootTenant.getDbName());
                 return Response.ok(rootTenant).build();
@@ -77,7 +77,7 @@ public class ConfigManagerResource {
     @Path("/tenant/{dbName}")
     public Response getTenantByDbName(@PathParam("dbName") String dbName) {
         try {
-            ConfigTenant tenant = configManagerService.getTenantByDbName(dbName);
+            Tenant tenant = configManagerService.getTenantByDbName(dbName);
             if (tenant != null) {
                 LOG.infof("Returning tenant: %s", dbName);
                 return Response.ok(tenant).build();
@@ -121,7 +121,7 @@ public class ConfigManagerResource {
     @Path("/health")
     public Response health() {
         try {
-            ConfigTenant root = configManagerService.getRootTenant();
+            Tenant root = configManagerService.getRootTenant();
             GlobalTenantRegistry registry = configManagerService.getRegistry();
             
             return Response.ok()
@@ -147,27 +147,24 @@ public class ConfigManagerResource {
     public Response getStatistics() {
         try {
             GlobalTenantRegistry registry = configManagerService.getRegistry();
-            ConfigTenant root = configManagerService.getRootTenant();
+            Tenant root = configManagerService.getRootTenant();
             
             int rootCount = 0;
             int resellerCount = 0;
             int endUserCount = 0;
             
-            for (ConfigTenant tenant : registry.getAllTenants().values()) {
-                switch (tenant.getType()) {
-                    case ROOT:
-                        rootCount++;
-                        break;
-                    case RESELLER_L1:
-                    case RESELLER_L2:
-                    case RESELLER_L3:
-                    case RESELLER_L4:
-                    case RESELLER_L5:
+            for (Tenant tenant : registry.getAllTenants().values()) {
+                // Determine tenant type based on parent hierarchy
+                if (tenant.getParent() == null) {
+                    rootCount++;
+                } else {
+                    // Count hierarchy depth to determine if reseller or end user
+                    int depth = getHierarchyDepth(tenant, registry);
+                    if (depth <= 5) {
                         resellerCount++;
-                        break;
-                    case END_USER:
+                    } else {
                         endUserCount++;
-                        break;
+                    }
                 }
             }
             
@@ -180,12 +177,27 @@ public class ConfigManagerResource {
                     "\"activeTenant\": \"" + (root != null ? root.getDbName() : "none") + "\"" +
                     "}")
                 .build();
-                
+
         } catch (Exception e) {
             LOG.errorf("Error fetching statistics: %s", e.getMessage());
             return Response.serverError()
                 .entity("{\"error\": \"" + e.getMessage() + "\"}")
                 .build();
         }
+    }
+
+    /**
+     * Helper method to calculate tenant hierarchy depth
+     */
+    private int getHierarchyDepth(Tenant tenant, GlobalTenantRegistry registry) {
+        int depth = 0;
+        String parent = tenant.getParent();
+        while (parent != null && depth < 10) { // Prevent infinite loops
+            Tenant parentTenant = registry.getTenantByDbName(parent);
+            if (parentTenant == null) break;
+            parent = parentTenant.getParent();
+            depth++;
+        }
+        return depth;
     }
 }

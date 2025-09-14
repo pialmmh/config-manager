@@ -6,7 +6,7 @@ This document describes how RouteSphere integrates with the RTC-Manager/ConfigMa
 ## Components Created
 
 ### 1. DTO Classes (`com.telcobright.routesphere.tenant.dto`)
-- **ConfigManagerTenant**: Matches the structure of `freeswitch.config.dynamic.Tenant`
+- **ConfigManagerTenant**: Matches the structure of `sharedtypes.nonentity.Tenant`
 - **TenantProfileDTO**: Simplified version of TenantProfile
 - **DynamicContextDTO**: Contains partner and rate plan information
 - **AllCacheDTO**: Contains package account cache

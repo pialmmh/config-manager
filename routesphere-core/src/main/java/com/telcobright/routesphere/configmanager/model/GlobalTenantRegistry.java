@@ -1,5 +1,6 @@
 package com.telcobright.routesphere.configmanager.model;
 
+import com.telcobright.rtc.domainmodel.nonentity.Tenant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -9,51 +10,51 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class GlobalTenantRegistry {
     
-    private final Map<String, ConfigTenant> tenantsByDbName = new ConcurrentHashMap<>();
-    private final Map<String, ConfigTenant> tenantsByName = new ConcurrentHashMap<>();
-    private ConfigTenant rootTenant;
+    private final Map<String, Tenant> tenantsByDbName = new ConcurrentHashMap<>();
+    private final Map<String, Tenant> tenantsByName = new ConcurrentHashMap<>();
+    private Tenant rootTenant;
     
-    public void registerTenant(ConfigTenant tenant) {
+    public void registerTenant(Tenant tenant) {
         if (tenant == null || tenant.getDbName() == null) {
             return;
         }
-        
+
         tenantsByDbName.put(tenant.getDbName(), tenant);
-        
-        if (tenant.getTenantName() != null) {
-            tenantsByName.put(tenant.getTenantName(), tenant);
-        }
-        
-        if (tenant.getType() == ConfigTenant.TenantType.ROOT) {
+
+        // For Tenant class, we use dbName as the tenant name
+        tenantsByName.put(tenant.getDbName(), tenant);
+
+        // Check if this is the root tenant (no parent)
+        if (tenant.getParent() == null) {
             this.rootTenant = tenant;
         }
     }
     
     public void unregisterTenant(String dbName) {
-        ConfigTenant tenant = tenantsByDbName.remove(dbName);
-        if (tenant != null && tenant.getTenantName() != null) {
-            tenantsByName.remove(tenant.getTenantName());
+        Tenant tenant = tenantsByDbName.remove(dbName);
+        if (tenant != null) {
+            tenantsByName.remove(tenant.getDbName());
         }
     }
     
-    public ConfigTenant getTenantByDbName(String dbName) {
+    public Tenant getTenantByDbName(String dbName) {
         return tenantsByDbName.get(dbName);
     }
     
-    public ConfigTenant getTenantByName(String name) {
+    public Tenant getTenantByName(String name) {
         return tenantsByName.get(name);
     }
     
-    public ConfigTenant getRootTenant() {
+    public Tenant getRootTenant() {
         return rootTenant;
     }
     
-    public void setRootTenant(ConfigTenant rootTenant) {
+    public void setRootTenant(Tenant rootTenant) {
         this.rootTenant = rootTenant;
         registerTenant(rootTenant);
     }
     
-    public Map<String, ConfigTenant> getAllTenants() {
+    public Map<String, Tenant> getAllTenants() {
         return new ConcurrentHashMap<>(tenantsByDbName);
     }
     

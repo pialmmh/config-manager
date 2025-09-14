@@ -89,5 +89,6 @@
         <module>partitioned-repo</module>
         <module>infinite-scheduler</module>
         <module>chronicle-db-Cache</module>
+        <module>util</module>
     </modules>
 </project>

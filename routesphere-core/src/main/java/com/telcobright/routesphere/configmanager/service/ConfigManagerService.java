@@ -1,8 +1,8 @@
 package com.telcobright.routesphere.configmanager.service;
 
 import com.telcobright.routesphere.config.GlobalConfigService;
-import com.telcobright.routesphere.configmanager.model.ConfigTenant;
-import com.telcobright.routesphere.configmanager.model.ConfigTenantProfile;
+import com.telcobright.rtc.domainmodel.nonentity.Tenant;
+import com.telcobright.rtc.domainmodel.nonentity.TenantProfile;
 import com.telcobright.routesphere.configmanager.model.GlobalTenantRegistry;
 import io.quarkus.runtime.StartupEvent;
 import jakarta.annotation.Priority;
@@ -37,7 +37,7 @@ public class ConfigManagerService {
     @ConfigProperty(name = "configmanager.api.enabled", defaultValue = "true")
     boolean apiEnabled;
     
-    private final AtomicReference<ConfigTenant> rootTenant = new AtomicReference<>();
+    private final AtomicReference<Tenant> rootTenant = new AtomicReference<>();
     private final GlobalTenantRegistry registry = new GlobalTenantRegistry();
     private final Client httpClient = ClientBuilder.newClient();
     
@@ -65,7 +65,7 @@ public class ConfigManagerService {
             LOG.infof("Loading configuration for tenant: %s, profile: %s", 
                 activeTenant, activeProfile);
             
-            ConfigTenant root = null;
+            Tenant root = null;
             
             if (apiEnabled && !"mock".equals(activeProfile)) {
                 // Try to load from ConfigManager API
@@ -78,11 +78,7 @@ public class ConfigManagerService {
                 root = buildMockTenantHierarchy(activeTenant);
             }
             
-            // Update root tenant name to match active tenant
-            if (root != null) {
-                root.setDbName(activeTenant);
-                root.setTenantName(activeTenant + " Organization");
-            }
+            // Root tenant dbName is already set in constructor
             
             // Store in registry and atomic reference
             rootTenant.set(root);
@@ -108,7 +104,7 @@ public class ConfigManagerService {
     /**
      * Load tenant hierarchy from ConfigManager API
      */
-    private ConfigTenant loadFromConfigManagerApi() {
+    private Tenant loadFromConfigManagerApi() {
         try {
             String url = configManagerApiUrl + "/get-tenant-root";
             LOG.infof("Fetching configuration from: %s", url);
@@ -119,7 +115,7 @@ public class ConfigManagerService {
                 .post(Entity.json(""));
             
             if (response.getStatus() == 200) {
-                ConfigTenant root = response.readEntity(ConfigTenant.class);
+                Tenant root = response.readEntity(Tenant.class);
                 LOG.info("Successfully loaded configuration from ConfigManager API");
                 return root;
             } else {
@@ -136,95 +132,64 @@ public class ConfigManagerService {
     /**
      * Build mock tenant hierarchy for testing
      */
-    private ConfigTenant buildMockTenantHierarchy(String rootName) {
+    private Tenant buildMockTenantHierarchy(String rootName) {
         // Create root tenant
-        ConfigTenant root = new ConfigTenant(rootName, rootName + " Organization");
-        root.setType(ConfigTenant.TenantType.ROOT);
+        Tenant root = new Tenant(rootName);
         root.setProfile(createMockProfile(rootName));
-        
-        // Add some properties
-        root.addProperty("max_resellers", 1000);
-        root.addProperty("max_end_users", 100000);
-        root.addProperty("api_version", "v2");
-        
+
         // Create Level 1 resellers
-        ConfigTenant reseller1 = new ConfigTenant(rootName + "_premium", "Premium Partner");
-        reseller1.setType(ConfigTenant.TenantType.RESELLER_L1);
+        Tenant reseller1 = new Tenant(rootName + "_premium");
         reseller1.setProfile(createMockProfile(reseller1.getDbName()));
+        reseller1.setParent(rootName);
         root.addChild(reseller1.getDbName(), reseller1);
-        
-        ConfigTenant reseller2 = new ConfigTenant(rootName + "_standard", "Standard Partner");
-        reseller2.setType(ConfigTenant.TenantType.RESELLER_L1);
+
+        Tenant reseller2 = new Tenant(rootName + "_standard");
         reseller2.setProfile(createMockProfile(reseller2.getDbName()));
+        reseller2.setParent(rootName);
         root.addChild(reseller2.getDbName(), reseller2);
-        
+
         // Create Level 2 resellers under premium
-        ConfigTenant reseller2_1 = new ConfigTenant(rootName + "_premium_east", "Eastern Region");
-        reseller2_1.setType(ConfigTenant.TenantType.RESELLER_L2);
+        Tenant reseller2_1 = new Tenant(rootName + "_premium_east");
         reseller2_1.setProfile(createMockProfile(reseller2_1.getDbName()));
+        reseller2_1.setParent(reseller1.getDbName());
         reseller1.addChild(reseller2_1.getDbName(), reseller2_1);
-        
+
         // Create end users
-        ConfigTenant endUser1 = new ConfigTenant(rootName + "_premium_east_customer1", "Customer 1");
-        endUser1.setType(ConfigTenant.TenantType.END_USER);
+        Tenant endUser1 = new Tenant(rootName + "_premium_east_customer1");
         endUser1.setProfile(createMockProfile(endUser1.getDbName()));
+        endUser1.setParent(reseller2_1.getDbName());
         reseller2_1.addChild(endUser1.getDbName(), endUser1);
-        
+
         return root;
     }
     
     /**
      * Create mock profile for a tenant
      */
-    private ConfigTenantProfile createMockProfile(String dbName) {
-        ConfigTenantProfile profile = new ConfigTenantProfile(dbName);
-        
-        // Database config
-        ConfigTenantProfile.DatabaseConfig dbConfig = new ConfigTenantProfile.DatabaseConfig();
-        dbConfig.setUrl("jdbc:mysql://127.0.0.1:3306/" + dbName);
-        dbConfig.setUsername("root");
-        dbConfig.setPassword("123456");
-        dbConfig.setDriver("com.mysql.cj.jdbc.Driver");
-        profile.setDatabaseConfig(dbConfig);
-        
-        // Kafka config
-        ConfigTenantProfile.KafkaConfig kafkaConfig = new ConfigTenantProfile.KafkaConfig();
-        kafkaConfig.setBootstrapServers("localhost:9092");
-        kafkaConfig.setGroupId(dbName + "_group");
-        profile.setKafkaConfig(kafkaConfig);
-        
-        // Redis config
-        ConfigTenantProfile.RedisConfig redisConfig = new ConfigTenantProfile.RedisConfig();
-        redisConfig.setHost("localhost");
-        redisConfig.setPort(6379);
-        redisConfig.setDatabase(0);
-        profile.setRedisConfig(redisConfig);
-        
-        // Add some cache data
-        profile.putInCache("routes", "mock_routes_data");
-        profile.putInCache("partners", "mock_partners_data");
-        profile.putInCache("dialplans", "mock_dialplans_data");
-        
-        return profile;
+    private TenantProfile createMockProfile(String dbName) {
+        // Create a mock TenantProfile
+        // Note: TenantProfile requires DynamicDatabaseService, DataLoader, etc.
+        // For mock data, we'll return null and let the profile be initialized later
+        return null;
     }
     
     /**
      * Register tenant hierarchy in global registry
      */
-    private void registerTenantHierarchy(ConfigTenant tenant) {
+    private void registerTenantHierarchy(Tenant tenant) {
         if (tenant == null) return;
         
         registry.registerTenant(tenant);
         
         // Recursively register children
-        for (ConfigTenant child : tenant.getChildren().values()) {
+        for (Tenant child : tenant.getChildren().values()) {
             registerTenantHierarchy(child);
         }
     }
     
     // Public API methods
     
-    public ConfigTenant getRootTenant() {
+    public Tenant getRootTenant() {
         return rootTenant.get();
     }
     
@@ -232,11 +197,11 @@ public class ConfigManagerService {
         return registry;
     }
     
-    public ConfigTenant getTenantByDbName(String dbName) {
+    public Tenant getTenantByDbName(String dbName) {
         return registry.getTenantByDbName(dbName);
     }
     
-    public ConfigTenant getTenantByName(String name) {
+    public Tenant getTenantByName(String name) {
         return registry.getTenantByName(name);
     }
 }

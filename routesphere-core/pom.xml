@@ -96,6 +96,53 @@
             <artifactId>quarkus-resteasy-reactive-jackson</artifactId>
             <version>${quarkus.platform.version}</version>
         </dependency>
+
+        <!-- JPA/Hibernate for entity classes -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-orm</artifactId>
+            <version>${quarkus.platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-orm-panache</artifactId>
+            <version>${quarkus.platform.version}</version>
+        </dependency>
+
+        <!-- Jakarta Persistence API -->
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
+        <!-- Lombok for entity classes -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.30</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Database drivers -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jdbc-mysql</artifactId>
+            <version>${quarkus.platform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jdbc-postgresql</artifactId>
+            <version>${quarkus.platform.version}</version>
+        </dependency>
+
+        <!-- Util module for entity conversion -->
+        <dependency>
+            <groupId>com.telcobright</groupId>
+            <artifactId>util</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
     
     <build>
@@ -106,4 +153,90 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Profile to sync domain models from ConfigManager -->
+        <profile>
+            <id>sync-entities</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>sync-domain-models-from-configmanager</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>com.telcobright.util.db.SpringToQuarkusEntityConverter</mainClass>
+                                    <classpathScope>compile</classpathScope>
+                                    <arguments>
+                                        <!-- Source: ConfigManager domain models -->
+                                        <argument>${basedir}/../RTC-Manager/ConfigManager/src/main/java/com/telcobright/rtc/domainmodel</argument>
+                                        <!-- Destination: routesphere-core domain models -->
+                                        <argument>${basedir}/src/main/java/com/telcobright/rtc/domainmodel</argument>
+                                        <!-- Annotations to preserve -->
+                                        <argument>Entity,Table,Id,GeneratedValue,Column,ManyToOne,OneToMany,ManyToMany,OneToOne,JoinColumn,JoinTable,Transient,Temporal,Enumerated,Lob,Basic,FetchType,CascadeType,Index,UniqueConstraint,NamedQuery,NamedQueries,SqlResultSetMapping,ColumnResult,EntityResult,FieldResult,NamedNativeQuery,NamedNativeQueries,SequenceGenerator,TableGenerator,Embeddable,Embedded,EmbeddedId,IdClass,MappedSuperclass,Inheritance,DiscriminatorColumn,DiscriminatorValue,PrimaryKeyJoinColumn,SecondaryTable,SecondaryTables,Version,PrePersist,PostPersist,PreUpdate,PostUpdate,PreRemove,PostRemove,PostLoad,Data,Getter,Setter,ToString,EqualsAndHashCode,NoArgsConstructor,AllArgsConstructor,Builder,JsonIgnore,JsonProperty,JsonFormat,JsonInclude</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.telcobright</groupId>
+                                <artifactId>util</artifactId>
+                                <version>1.0-SNAPSHOT</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+
+                    <!-- Optional: Clean up after sync -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>cleanup-after-sync</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <echo message="================================================="/>
+                                        <echo message="Post-sync cleanup tasks"/>
+                                        <echo message="================================================="/>
+
+                                        <!-- Remove any remaining Spring/ConfigManager specific imports (but keep nonentity folder) -->
+                                        <replaceregexp byline="true" flags="g">
+                                            <regexp pattern="^import freeswitch\..*$"/>
+                                            <substitution expression=""/>
+                                            <fileset dir="${basedir}/src/main/java/com/telcobright/rtc/domainmodel">
+                                                <include name="**/*.java"/>
+                                            </fileset>
+                                        </replaceregexp>
+
+                                        <replaceregexp byline="true" flags="g">
+                                            <regexp pattern="^import sharedtypes\..*$"/>
+                                            <substitution expression=""/>
+                                            <fileset dir="${basedir}/src/main/java/com/telcobright/rtc/domainmodel">
+                                                <include name="**/*.java"/>
+                                            </fileset>
+                                        </replaceregexp>
+
+                                        <echo message="Cleanup completed!"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
