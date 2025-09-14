@@ -1,0 +1,5 @@
+Test Run Started: 2025-09-11T21:34:46.389Z
+================================================================================
+
+[2025-09-11T21:34:46.390Z] [INFO] Starting Stellar Integration Tests
+[2025-09-11T21:34:46.408Z] [ERROR] Server is not healthy! Make sure Quarkus is running on port 8080

@@ -1,0 +1,45 @@
+================================================
+Claude Bridge - Example Commands for Claude Code
+================================================
+
+1. Check current state:
+   "Get the React app state from http://localhost:9999/api/state"
+
+2. Debug components:
+   "Check http://localhost:9999/api/components and tell me what components are rendered"
+   "Why is MenuBar not in the component tree at http://localhost:9999/api/components?"
+
+3. Analyze errors:
+   "Look at http://localhost:9999/api/errors and help me fix them"
+   "Check the console at http://localhost:9999/api/console for any warnings"
+
+4. Check network:
+   "Analyze the API calls at http://localhost:9999/api/network"
+   "Are there any failed requests in http://localhost:9999/api/network?"
+
+5. Inspect storage:
+   "Check localStorage at http://localhost:9999/api/storage"
+   "Why isn't user data persisting? Check http://localhost:9999/api/storage"
+
+6. Save state for analysis:
+   curl -X POST http://localhost:9999/api/save
+   "Analyze the state file and identify performance issues"
+
+7. Health check:
+   curl http://localhost:9999/health
+
+================================================
+Quick test commands:
+================================================
+
+# Test if bridge is working:
+curl http://localhost:9999/health | jq '.'
+
+# Get current components:
+curl http://localhost:9999/api/components | jq '.'
+
+# Get recent errors:
+curl http://localhost:9999/api/errors | jq '.'
+
+# Get console logs:
+curl http://localhost:9999/api/console | jq '.'

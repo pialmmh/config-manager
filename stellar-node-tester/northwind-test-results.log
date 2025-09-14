@@ -1,0 +1,994 @@
+Northwind Test Run Started: 2025-09-11T22:46:31.186Z
+================================================================================
+
+
+Query 883 FAILED:
+Query: {
+  "kind": "salesorder",
+  "page": {
+    "limit": 5,
+    "offset": 0
+  },
+  "include": [
+    {
+      "kind": "orderdetail",
+      "page": {
+        "limit": 10,
+        "offset": 0
+      }
+    },
+    {
+      "kind": "customer",
+      "page": {
+        "limit": 1,
+        "offset": 0
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge SALESORDER -> CUSTOMER
+Stack: N/A
+────────────────────────────────────────
+
+Query 887 FAILED:
+Query: {
+  "kind": "customer",
+  "include": [
+    {
+      "kind": "category",
+      "page": {
+        "limit": 37,
+        "offset": 70
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CUSTOMER -> CATEGORY
+Stack: N/A
+────────────────────────────────────────
+
+Query 889 FAILED:
+Query: {
+  "kind": "supplier",
+  "page": {
+    "limit": 13,
+    "offset": 145
+  },
+  "include": [
+    {
+      "kind": "employee"
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge SUPPLIER -> EMPLOYEE
+Stack: N/A
+────────────────────────────────────────
+
+Query 890 FAILED:
+Query: {
+  "kind": "shipper",
+  "include": [
+    {
+      "kind": "supplier",
+      "page": {
+        "limit": 27,
+        "offset": 56
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge SHIPPER -> SUPPLIER
+Stack: N/A
+────────────────────────────────────────
+
+Query 891 FAILED:
+Query: {
+  "kind": "salesorder",
+  "page": {
+    "limit": 31,
+    "offset": 1
+  },
+  "include": [
+    {
+      "kind": "supplier",
+      "page": {
+        "limit": 6,
+        "offset": 42
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge SALESORDER -> SUPPLIER
+Stack: N/A
+────────────────────────────────────────
+
+Query 892 FAILED:
+Query: {
+  "kind": "orderdetail",
+  "page": {
+    "limit": 88,
+    "offset": 151
+  },
+  "include": [
+    {
+      "kind": "shipper",
+      "page": {
+        "limit": 11,
+        "offset": 44
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge ORDERDETAIL -> SHIPPER
+Stack: N/A
+────────────────────────────────────────
+
+Query 895 FAILED:
+Query: {
+  "kind": "customer",
+  "page": {
+    "limit": 8,
+    "offset": 154
+  },
+  "include": [
+    {
+      "kind": "employee",
+      "page": {
+        "limit": 46,
+        "offset": 20
+      },
+      "include": [
+        {
+          "kind": "supplier",
+          "page": {
+            "limit": 7,
+            "offset": 0
+          }
+        }
+      ]
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CUSTOMER -> EMPLOYEE
+Stack: N/A
+────────────────────────────────────────
+
+Query 897 FAILED:
+Query: {
+  "kind": "salesorder",
+  "page": {
+    "limit": 49,
+    "offset": 100
+  },
+  "include": [
+    {
+      "kind": "salesorder",
+      "page": {
+        "limit": 16,
+        "offset": 3
+      },
+      "include": [
+        {
+          "kind": "employee",
+          "page": {
+            "limit": 12,
+            "offset": 0
+          }
+        }
+      ]
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge SALESORDER -> SALESORDER
+Stack: N/A
+────────────────────────────────────────
+
+Query 898 FAILED:
+Query: {
+  "kind": "employee",
+  "page": {
+    "limit": 76,
+    "offset": 113
+  },
+  "include": [
+    {
+      "kind": "shipper",
+      "page": {
+        "limit": 22,
+        "offset": 5
+      },
+      "include": [
+        {
+          "kind": "salesorder",
+          "page": {
+            "limit": 8,
+            "offset": 0
+          }
+        }
+      ]
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge EMPLOYEE -> SHIPPER
+Stack: N/A
+────────────────────────────────────────
+
+Query 900 FAILED:
+Query: {
+  "kind": "product",
+  "page": {
+    "limit": 81,
+    "offset": 39
+  },
+  "include": [
+    {
+      "kind": "supplier"
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge PRODUCT -> SUPPLIER
+Stack: N/A
+────────────────────────────────────────
+
+Query 903 FAILED:
+Query: {
+  "kind": "category",
+  "include": [
+    {
+      "kind": "supplier"
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CATEGORY -> SUPPLIER
+Stack: N/A
+────────────────────────────────────────
+
+Query 904 FAILED:
+Query: {
+  "kind": "category",
+  "page": {
+    "limit": 61,
+    "offset": 88
+  },
+  "include": [
+    {
+      "kind": "shipper"
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CATEGORY -> SHIPPER
+Stack: N/A
+────────────────────────────────────────
+
+Query 907 FAILED:
+Query: {
+  "kind": "employee",
+  "page": {
+    "limit": 73,
+    "offset": 130
+  },
+  "include": [
+    {
+      "kind": "category",
+      "include": [
+        {
+          "kind": "orderdetail",
+          "page": {
+            "limit": 16,
+            "offset": 0
+          }
+        }
+      ]
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge EMPLOYEE -> CATEGORY
+Stack: N/A
+────────────────────────────────────────
+
+Query 908 FAILED:
+Query: {
+  "kind": "product",
+  "include": [
+    {
+      "kind": "employee"
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge PRODUCT -> EMPLOYEE
+Stack: N/A
+────────────────────────────────────────
+
+Query 909 FAILED:
+Query: {
+  "kind": "salesorder",
+  "include": [
+    {
+      "kind": "salesorder",
+      "page": {
+        "limit": 1,
+        "offset": 0
+      },
+      "include": [
+        {
+          "kind": "salesorder",
+          "page": {
+            "limit": 5,
+            "offset": 0
+          }
+        }
+      ]
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge SALESORDER -> SALESORDER
+Stack: N/A
+────────────────────────────────────────
+
+Query 910 FAILED:
+Query: {
+  "kind": "employee",
+  "include": [
+    {
+      "kind": "customer",
+      "page": {
+        "limit": 11,
+        "offset": 39
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge EMPLOYEE -> CUSTOMER
+Stack: N/A
+────────────────────────────────────────
+
+Query 913 FAILED:
+Query: {
+  "kind": "category",
+  "page": {
+    "limit": 98,
+    "offset": 87
+  },
+  "include": [
+    {
+      "kind": "shipper",
+      "page": {
+        "limit": 42,
+        "offset": 58
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CATEGORY -> SHIPPER
+Stack: N/A
+────────────────────────────────────────
+
+Query 914 FAILED:
+Query: {
+  "kind": "customer",
+  "page": {
+    "limit": 19,
+    "offset": 56
+  },
+  "include": [
+    {
+      "kind": "shipper"
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CUSTOMER -> SHIPPER
+Stack: N/A
+────────────────────────────────────────
+
+Query 915 FAILED:
+Query: {
+  "kind": "salesorder",
+  "page": {
+    "limit": 15,
+    "offset": 92
+  },
+  "include": [
+    {
+      "kind": "salesorder",
+      "page": {
+        "limit": 2,
+        "offset": 19
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge SALESORDER -> SALESORDER
+Stack: N/A
+────────────────────────────────────────
+
+Query 918 FAILED:
+Query: {
+  "kind": "category",
+  "page": {
+    "limit": 60,
+    "offset": 110
+  },
+  "include": [
+    {
+      "kind": "orderdetail",
+      "page": {
+        "limit": 17,
+        "offset": 66
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CATEGORY -> ORDERDETAIL
+Stack: N/A
+────────────────────────────────────────
+
+Query 920 FAILED:
+Query: {
+  "kind": "orderdetail",
+  "page": {
+    "limit": 81,
+    "offset": 126
+  },
+  "include": [
+    {
+      "kind": "salesorder",
+      "include": [
+        {
+          "kind": "orderdetail"
+        }
+      ]
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge ORDERDETAIL -> SALESORDER
+Stack: N/A
+────────────────────────────────────────
+
+Query 922 FAILED:
+Query: {
+  "kind": "category",
+  "page": {
+    "limit": 13,
+    "offset": 160
+  },
+  "include": [
+    {
+      "kind": "shipper",
+      "page": {
+        "limit": 6,
+        "offset": 16
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CATEGORY -> SHIPPER
+Stack: N/A
+────────────────────────────────────────
+
+Query 924 FAILED:
+Query: {
+  "kind": "supplier",
+  "page": {
+    "limit": 2,
+    "offset": 76
+  },
+  "include": [
+    {
+      "kind": "shipper",
+      "include": [
+        {
+          "kind": "shipper"
+        }
+      ]
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge SUPPLIER -> SHIPPER
+Stack: N/A
+────────────────────────────────────────
+
+Query 925 FAILED:
+Query: {
+  "kind": "category",
+  "page": {
+    "limit": 5,
+    "offset": 66
+  },
+  "include": [
+    {
+      "kind": "employee",
+      "page": {
+        "limit": 45,
+        "offset": 27
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CATEGORY -> EMPLOYEE
+Stack: N/A
+────────────────────────────────────────
+
+Query 926 FAILED:
+Query: {
+  "kind": "employee",
+  "page": {
+    "limit": 13,
+    "offset": 156
+  },
+  "include": [
+    {
+      "kind": "supplier"
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge EMPLOYEE -> SUPPLIER
+Stack: N/A
+────────────────────────────────────────
+
+Query 928 FAILED:
+Query: {
+  "kind": "employee",
+  "page": {
+    "limit": 22,
+    "offset": 131
+  },
+  "include": [
+    {
+      "kind": "customer",
+      "page": {
+        "limit": 15,
+        "offset": 64
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge EMPLOYEE -> CUSTOMER
+Stack: N/A
+────────────────────────────────────────
+
+Query 929 FAILED:
+Query: {
+  "kind": "supplier",
+  "page": {
+    "limit": 22,
+    "offset": 67
+  },
+  "include": [
+    {
+      "kind": "category",
+      "page": {
+        "limit": 42,
+        "offset": 26
+      },
+      "include": [
+        {
+          "kind": "orderdetail",
+          "page": {
+            "limit": 14,
+            "offset": 0
+          }
+        }
+      ]
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge SUPPLIER -> CATEGORY
+Stack: N/A
+────────────────────────────────────────
+
+Query 930 FAILED:
+Query: {
+  "kind": "customer",
+  "include": [
+    {
+      "kind": "orderdetail",
+      "page": {
+        "limit": 33,
+        "offset": 21
+      },
+      "include": [
+        {
+          "kind": "category",
+          "page": {
+            "limit": 1,
+            "offset": 0
+          }
+        }
+      ]
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CUSTOMER -> ORDERDETAIL
+Stack: N/A
+────────────────────────────────────────
+
+Query 931 FAILED:
+Query: {
+  "kind": "supplier",
+  "page": {
+    "limit": 12,
+    "offset": 96
+  },
+  "include": [
+    {
+      "kind": "shipper",
+      "page": {
+        "limit": 10,
+        "offset": 61
+      },
+      "include": [
+        {
+          "kind": "category"
+        }
+      ]
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge SUPPLIER -> SHIPPER
+Stack: N/A
+────────────────────────────────────────
+
+Query 932 FAILED:
+Query: {
+  "kind": "customer",
+  "include": [
+    {
+      "kind": "supplier",
+      "page": {
+        "limit": 42,
+        "offset": 35
+      },
+      "include": [
+        {
+          "kind": "orderdetail"
+        }
+      ]
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CUSTOMER -> SUPPLIER
+Stack: N/A
+────────────────────────────────────────
+
+Query 933 FAILED:
+Query: {
+  "kind": "shipper",
+  "page": {
+    "limit": 18,
+    "offset": 41
+  },
+  "include": [
+    {
+      "kind": "product",
+      "page": {
+        "limit": 4,
+        "offset": 97
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge SHIPPER -> PRODUCT
+Stack: N/A
+────────────────────────────────────────
+
+Query 934 FAILED:
+Query: {
+  "kind": "customer",
+  "include": [
+    {
+      "kind": "employee",
+      "include": [
+        {
+          "kind": "category",
+          "page": {
+            "limit": 16,
+            "offset": 0
+          }
+        }
+      ]
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CUSTOMER -> EMPLOYEE
+Stack: N/A
+────────────────────────────────────────
+
+Query 936 FAILED:
+Query: {
+  "kind": "category",
+  "page": {
+    "limit": 58,
+    "offset": 101
+  },
+  "include": [
+    {
+      "kind": "shipper",
+      "page": {
+        "limit": 47,
+        "offset": 66
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CATEGORY -> SHIPPER
+Stack: N/A
+────────────────────────────────────────
+
+Query 937 FAILED:
+Query: {
+  "kind": "supplier",
+  "page": {
+    "limit": 42,
+    "offset": 134
+  },
+  "include": [
+    {
+      "kind": "category"
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge SUPPLIER -> CATEGORY
+Stack: N/A
+────────────────────────────────────────
+
+Query 939 FAILED:
+Query: {
+  "kind": "supplier",
+  "page": {
+    "limit": 63,
+    "offset": 65
+  },
+  "include": [
+    {
+      "kind": "supplier",
+      "page": {
+        "limit": 10,
+        "offset": 31
+      },
+      "include": [
+        {
+          "kind": "supplier"
+        }
+      ]
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge SUPPLIER -> SUPPLIER
+Stack: N/A
+────────────────────────────────────────
+
+Query 943 FAILED:
+Query: {
+  "kind": "orderdetail",
+  "include": [
+    {
+      "kind": "customer",
+      "page": {
+        "limit": 16,
+        "offset": 44
+      },
+      "include": [
+        {
+          "kind": "salesorder"
+        }
+      ]
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge ORDERDETAIL -> CUSTOMER
+Stack: N/A
+────────────────────────────────────────
+
+Query 944 FAILED:
+Query: {
+  "kind": "category",
+  "page": {
+    "limit": 55,
+    "offset": 22
+  },
+  "include": [
+    {
+      "kind": "orderdetail",
+      "page": {
+        "limit": 22,
+        "offset": 94
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CATEGORY -> ORDERDETAIL
+Stack: N/A
+────────────────────────────────────────
+
+Query 945 FAILED:
+Query: {
+  "kind": "customer",
+  "include": [
+    {
+      "kind": "customer",
+      "page": {
+        "limit": 50,
+        "offset": 35
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CUSTOMER -> CUSTOMER
+Stack: N/A
+────────────────────────────────────────
+
+Query 947 FAILED:
+Query: {
+  "kind": "customer",
+  "include": [
+    {
+      "kind": "product"
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CUSTOMER -> PRODUCT
+Stack: N/A
+────────────────────────────────────────
+
+Query 948 FAILED:
+Query: {
+  "kind": "category",
+  "page": {
+    "limit": 36,
+    "offset": 172
+  },
+  "include": [
+    {
+      "kind": "employee",
+      "page": {
+        "limit": 41,
+        "offset": 22
+      },
+      "include": [
+        {
+          "kind": "orderdetail"
+        }
+      ]
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CATEGORY -> EMPLOYEE
+Stack: N/A
+────────────────────────────────────────
+
+Query 949 FAILED:
+Query: {
+  "kind": "category",
+  "page": {
+    "limit": 3,
+    "offset": 19
+  },
+  "include": [
+    {
+      "kind": "salesorder",
+      "page": {
+        "limit": 34,
+        "offset": 76
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CATEGORY -> SALESORDER
+Stack: N/A
+────────────────────────────────────────
+
+Query 951 FAILED:
+Query: {
+  "kind": "shipper",
+  "page": {
+    "limit": 95,
+    "offset": 120
+  },
+  "include": [
+    {
+      "kind": "shipper",
+      "page": {
+        "limit": 31,
+        "offset": 77
+      }
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge SHIPPER -> SHIPPER
+Stack: N/A
+────────────────────────────────────────
+
+Query 952 FAILED:
+Query: {
+  "kind": "product",
+  "page": {
+    "limit": 45,
+    "offset": 13
+  },
+  "include": [
+    {
+      "kind": "supplier",
+      "include": [
+        {
+          "kind": "shipper"
+        }
+      ]
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge PRODUCT -> SUPPLIER
+Stack: N/A
+────────────────────────────────────────
+
+Query 954 FAILED:
+Query: {
+  "kind": "customer",
+  "page": {
+    "limit": 14,
+    "offset": 89
+  },
+  "include": [
+    {
+      "kind": "category"
+    }
+  ]
+}
+Error: API Error: Internal server error: No edge CUSTOMER -> CATEGORY
+Stack: N/A
+────────────────────────────────────────
+
+================================================================================
+TEST SUMMARY
+================================================================================
+Total Queries: 956
+Successful: 912
+Failed: 44
+Success Rate: 95.40%
+Duration: 3894ms
+================================================================================
+
+Failed Queries:
+  - Query 883: salesorder - API Error: Internal server error: No edge SALESORDER -> CUSTOMER
+  - Query 887: customer - API Error: Internal server error: No edge CUSTOMER -> CATEGORY
+  - Query 889: supplier - API Error: Internal server error: No edge SUPPLIER -> EMPLOYEE
+  - Query 890: shipper - API Error: Internal server error: No edge SHIPPER -> SUPPLIER
+  - Query 891: salesorder - API Error: Internal server error: No edge SALESORDER -> SUPPLIER
+  - Query 892: orderdetail - API Error: Internal server error: No edge ORDERDETAIL -> SHIPPER
+  - Query 895: customer - API Error: Internal server error: No edge CUSTOMER -> EMPLOYEE
+  - Query 897: salesorder - API Error: Internal server error: No edge SALESORDER -> SALESORDER
+  - Query 898: employee - API Error: Internal server error: No edge EMPLOYEE -> SHIPPER
+  - Query 900: product - API Error: Internal server error: No edge PRODUCT -> SUPPLIER
+  - Query 903: category - API Error: Internal server error: No edge CATEGORY -> SUPPLIER
+  - Query 904: category - API Error: Internal server error: No edge CATEGORY -> SHIPPER
+  - Query 907: employee - API Error: Internal server error: No edge EMPLOYEE -> CATEGORY
+  - Query 908: product - API Error: Internal server error: No edge PRODUCT -> EMPLOYEE
+  - Query 909: salesorder - API Error: Internal server error: No edge SALESORDER -> SALESORDER
+  - Query 910: employee - API Error: Internal server error: No edge EMPLOYEE -> CUSTOMER
+  - Query 913: category - API Error: Internal server error: No edge CATEGORY -> SHIPPER
+  - Query 914: customer - API Error: Internal server error: No edge CUSTOMER -> SHIPPER
+  - Query 915: salesorder - API Error: Internal server error: No edge SALESORDER -> SALESORDER
+  - Query 918: category - API Error: Internal server error: No edge CATEGORY -> ORDERDETAIL
+  - Query 920: orderdetail - API Error: Internal server error: No edge ORDERDETAIL -> SALESORDER
+  - Query 922: category - API Error: Internal server error: No edge CATEGORY -> SHIPPER
+  - Query 924: supplier - API Error: Internal server error: No edge SUPPLIER -> SHIPPER
+  - Query 925: category - API Error: Internal server error: No edge CATEGORY -> EMPLOYEE
+  - Query 926: employee - API Error: Internal server error: No edge EMPLOYEE -> SUPPLIER
+  - Query 928: employee - API Error: Internal server error: No edge EMPLOYEE -> CUSTOMER
+  - Query 929: supplier - API Error: Internal server error: No edge SUPPLIER -> CATEGORY
+  - Query 930: customer - API Error: Internal server error: No edge CUSTOMER -> ORDERDETAIL
+  - Query 931: supplier - API Error: Internal server error: No edge SUPPLIER -> SHIPPER
+  - Query 932: customer - API Error: Internal server error: No edge CUSTOMER -> SUPPLIER
+  - Query 933: shipper - API Error: Internal server error: No edge SHIPPER -> PRODUCT
+  - Query 934: customer - API Error: Internal server error: No edge CUSTOMER -> EMPLOYEE
+  - Query 936: category - API Error: Internal server error: No edge CATEGORY -> SHIPPER
+  - Query 937: supplier - API Error: Internal server error: No edge SUPPLIER -> CATEGORY
+  - Query 939: supplier - API Error: Internal server error: No edge SUPPLIER -> SUPPLIER
+  - Query 943: orderdetail - API Error: Internal server error: No edge ORDERDETAIL -> CUSTOMER
+  - Query 944: category - API Error: Internal server error: No edge CATEGORY -> ORDERDETAIL
+  - Query 945: customer - API Error: Internal server error: No edge CUSTOMER -> CUSTOMER
+  - Query 947: customer - API Error: Internal server error: No edge CUSTOMER -> PRODUCT
+  - Query 948: category - API Error: Internal server error: No edge CATEGORY -> EMPLOYEE
+  - Query 949: category - API Error: Internal server error: No edge CATEGORY -> SALESORDER
+  - Query 951: shipper - API Error: Internal server error: No edge SHIPPER -> SHIPPER
+  - Query 952: product - API Error: Internal server error: No edge PRODUCT -> SUPPLIER
+  - Query 954: customer - API Error: Internal server error: No edge CUSTOMER -> CATEGORY
