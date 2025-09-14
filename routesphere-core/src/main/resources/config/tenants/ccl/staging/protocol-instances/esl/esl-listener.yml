@@ -1,0 +1,56 @@
+esl-listener:
+  instance-id: ccl-staging-esl-01
+  enabled: true
+
+  # Connection settings for FreeSWITCH ESL
+  connection:
+    host: staging.freeswitch.local
+    port: 8021
+    password: ClueCon-Staging
+    reconnect-interval-seconds: 5
+    connection-timeout-seconds: 10
+
+  # Tenant identification configuration
+  tenant-identifier:
+    # Similar to FreeSWITCH context concept - identifies which tenant/context this ESL instance belongs to
+    context: ccl-staging
+    tenant-id: ccl
+    environment: staging
+
+    # Channel variable patterns to identify tenant from incoming calls
+    channel-patterns:
+      - variable: "sip_h_X-Tenant-ID"
+        pattern: "ccl"
+      - variable: "context"
+        pattern: "ccl-staging-.*"
+      - variable: "sip_profile"
+        pattern: "ccl-staging"
+
+  # Event subscriptions
+  events:
+    - CHANNEL_CREATE
+    - CHANNEL_ANSWER
+    - CHANNEL_HANGUP
+    - CHANNEL_HANGUP_COMPLETE
+    - CHANNEL_BRIDGE
+    - CUSTOM
+    - HEARTBEAT
+
+  # Processing pipeline configuration
+  pipeline:
+    # Initial context for call flow analysis (like FreeSWITCH dialplan context)
+    initial-context: public
+
+    # Processors to apply for ESL events
+    processors:
+      - tenant-identification
+      - admission-control
+      - business-rules
+      - routing-decision
+      - action-execution
+
+  # Monitoring and health check
+  monitoring:
+    health-check-interval-seconds: 20
+    metrics-enabled: true
+    log-level: DEBUG

@@ -1,0 +1,166 @@
+sip-listener:
+  instance-id: ccl-prod-sip-01
+  enabled: true
+
+  # SIP server configuration
+  server:
+    # Transport protocols
+    transports:
+      - type: UDP
+        host: 103.95.96.77
+        port: 5060
+      - type: TCP
+        host: 103.95.96.77
+        port: 5060
+      - type: TLS
+        host: 103.95.96.77
+        port: 5061
+        tls:
+          keystore: ${SIP_TLS_KEYSTORE}
+          keystore-password: ${SIP_TLS_PASSWORD}
+          client-auth: required
+          protocols: ["TLSv1.2", "TLSv1.3"]
+
+  # SIP profile configuration (similar to FreeSWITCH SIP profiles)
+  profile:
+    name: ccl-prod-profile
+    # Context defines the initial processing context (like FreeSWITCH dialplan context)
+    context: public
+
+    # Domain settings
+    domains:
+      - sip.ccl.com
+      - 103.95.96.77
+
+    # NAT handling
+    nat:
+      enabled: true
+      external-ip: 103.95.96.77
+      external-rtp-ip: 103.95.96.77
+
+  # Tenant identification configuration
+  tenant-identifier:
+    # Context that maps to dialplan entry point
+    context: ccl-prod
+    tenant-id: ccl
+    environment: prod
+
+    # Patterns to identify tenant from SIP messages
+    identification-methods:
+      - type: header
+        name: X-Tenant-ID
+        pattern: "ccl"
+      - type: from-domain
+        pattern: "(sip\\.)?ccl\\.com"
+      - type: to-domain
+        pattern: "(sip\\.)?ccl\\.com"
+      - type: request-uri
+        pattern: "sip:.*@(sip\\.)?ccl\\.com"
+      - type: custom-header
+        name: X-Context
+        pattern: "ccl-prod"
+      - type: source-ip
+        patterns:
+          - "103.95.96.0/24"  # Trusted network
+
+  # Registration settings
+  registration:
+    enabled: true
+    expire-seconds: 1800
+    min-expire: 60
+    max-registrations-per-user: 3
+    require-authentication: true
+
+  # Call routing configuration
+  routing:
+    # Initial context for call processing (entry point in dialplan)
+    initial-context: public
+
+    # Dialplan-like contexts
+    contexts:
+      public:
+        description: "Public context for inbound calls"
+        processors:
+          - tenant-identification
+          - admission-control
+          - fraud-detection
+      authenticated:
+        description: "Context for authenticated users"
+        processors:
+          - authorization
+          - rate-limiting
+          - business-rules
+          - routing-decision
+      internal:
+        description: "Internal calls between extensions"
+        processors:
+          - internal-routing
+          - call-recording
+      emergency:
+        description: "Emergency call routing"
+        processors:
+          - emergency-routing
+        priority: highest
+
+  # Processing pipeline configuration
+  pipeline:
+    processors:
+      - tenant-identification
+      - authentication
+      - registration-handler
+      - admission-control
+      - fraud-detection
+      - rate-limiting
+      - business-rules
+      - routing-decision
+      - billing-pre-check
+      - action-execution
+      - cdr-generation
+
+  # Security settings
+  security:
+    require-authentication: true
+    challenge-auth: true
+    allowed-ips:
+      - 103.95.96.0/24  # Corporate network
+      - 203.0.113.0/24  # Partner network
+    blocked-ips:
+      - 192.0.2.0/24    # Example blocked range
+    max-calls-per-second: 100
+    max-registrations-per-ip: 10
+
+    # DDoS protection
+    ddos-protection:
+      enabled: true
+      threshold-pps: 1000
+      block-duration-seconds: 300
+
+  # High availability
+  high-availability:
+    enabled: true
+    virtual-ip: 103.95.96.70
+    peers:
+      - host: 103.95.96.78
+        priority: 2
+
+  # Media handling
+  media:
+    rtp-port-start: 10000
+    rtp-port-end: 20000
+    dtmf-type: rfc2833
+    codecs:
+      - G711u
+      - G711a
+      - G729
+      - opus
+
+  # Monitoring
+  monitoring:
+    sip-trace: false  # Disabled in production for performance
+    log-level: WARN
+    metrics-enabled: true
+    alerting:
+      enabled: true
+      thresholds:
+        failed-registrations-per-minute: 100
+        failed-calls-per-minute: 50

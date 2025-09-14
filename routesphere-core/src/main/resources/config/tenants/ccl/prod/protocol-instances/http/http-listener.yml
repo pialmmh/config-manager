@@ -1,0 +1,92 @@
+http-listener:
+  instance-id: ccl-prod-http-01
+  enabled: true
+
+  # HTTP server configuration
+  server:
+    host: 0.0.0.0
+    port: 443
+    context-path: /api/ccl
+    ssl:
+      enabled: true
+      keystore: ${SSL_KEYSTORE_PATH}
+      keystore-password: ${SSL_KEYSTORE_PASSWORD}
+      trust-store: ${SSL_TRUSTSTORE_PATH}
+
+  # Tenant identification configuration
+  tenant-identifier:
+    # Context similar to routing context in web applications
+    context: ccl-prod
+    tenant-id: ccl
+    environment: prod
+
+    # Patterns to identify tenant from HTTP requests
+    identification-methods:
+      - type: header
+        name: X-Tenant-ID
+        pattern: "ccl"
+      - type: subdomain
+        pattern: "ccl\\..*"
+      - type: host
+        pattern: "api\\.ccl\\.com"
+      - type: path
+        pattern: "/api/ccl/.*"
+
+  # Request routing configuration
+  routing:
+    # Initial context for request processing
+    initial-context: public
+
+    # Route definitions
+    routes:
+      - path: /health
+        method: GET
+        public: true
+        rate-limit: 10
+      - path: /api/ccl/**
+        methods: [GET, POST, PUT, DELETE]
+        requires-auth: true
+
+  # Processing pipeline configuration
+  pipeline:
+    processors:
+      - tenant-identification
+      - authentication
+      - authorization
+      - rate-limiting
+      - request-validation
+      - business-rules
+      - routing-decision
+      - action-execution
+      - response-caching
+
+  # Security configuration
+  security:
+    cors:
+      enabled: true
+      allowed-origins: ["https://ccl.com", "https://app.ccl.com"]
+      allowed-methods: [GET, POST, PUT, DELETE, OPTIONS]
+      allowed-headers: ["Authorization", "Content-Type", "X-Tenant-ID"]
+
+    rate-limiting:
+      enabled: true
+      requests-per-minute: 1000
+      burst-size: 100
+
+    authentication:
+      type: jwt
+      secret: ${JWT_SECRET}
+      expiry-hours: 24
+
+  # Load balancing
+  load-balancing:
+    enabled: true
+    instances: 3
+    strategy: least-connections
+
+  # Monitoring
+  monitoring:
+    metrics-enabled: true
+    log-level: WARN
+    access-log: true
+    slow-request-threshold-ms: 1000

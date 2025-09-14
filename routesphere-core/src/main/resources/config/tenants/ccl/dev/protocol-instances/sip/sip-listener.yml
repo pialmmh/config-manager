@@ -1,0 +1,106 @@
+sip-listener:
+  instance-id: ccl-dev-sip-01
+  enabled: true
+
+  # SIP server configuration
+  server:
+    # Transport protocols
+    transports:
+      - type: UDP
+        host: 0.0.0.0
+        port: 5060
+      - type: TCP
+        host: 0.0.0.0
+        port: 5060
+      - type: TLS
+        host: 0.0.0.0
+        port: 5061
+        tls:
+          keystore: ${SIP_TLS_KEYSTORE}
+          keystore-password: ${SIP_TLS_PASSWORD}
+
+  # SIP profile configuration (similar to FreeSWITCH SIP profiles)
+  profile:
+    name: ccl-dev-profile
+    # Context defines the initial processing context (like FreeSWITCH dialplan context)
+    context: public
+
+    # Domain settings
+    domains:
+      - ccl-dev.local
+      - 192.168.1.100
+
+  # Tenant identification configuration
+  tenant-identifier:
+    # Context that maps to dialplan entry point
+    context: ccl-dev
+    tenant-id: ccl
+    environment: dev
+
+    # Patterns to identify tenant from SIP messages
+    identification-methods:
+      - type: header
+        name: X-Tenant-ID
+        pattern: "ccl"
+      - type: from-domain
+        pattern: "ccl-dev\\..*"
+      - type: to-domain
+        pattern: "ccl-dev\\..*"
+      - type: request-uri
+        pattern: "sip:.*@ccl-dev\\..*"
+      - type: custom-header
+        name: X-Context
+        pattern: "ccl-dev"
+
+  # Registration settings
+  registration:
+    enabled: true
+    expire-seconds: 3600
+    max-registrations-per-user: 5
+
+  # Call routing configuration
+  routing:
+    # Initial context for call processing (entry point in dialplan)
+    initial-context: public
+
+    # Dialplan-like contexts
+    contexts:
+      public:
+        description: "Public context for unauthenticated calls"
+        processors:
+          - tenant-identification
+          - admission-control
+      authenticated:
+        description: "Context for authenticated users"
+        processors:
+          - authorization
+          - business-rules
+          - routing-decision
+      internal:
+        description: "Internal calls between extensions"
+        processors:
+          - internal-routing
+
+  # Processing pipeline configuration
+  pipeline:
+    processors:
+      - tenant-identification
+      - authentication
+      - registration-handler
+      - admission-control
+      - business-rules
+      - routing-decision
+      - action-execution
+
+  # Security settings
+  security:
+    require-authentication: false  # Dev environment
+    allowed-ips:
+      - 0.0.0.0/0
+    max-calls-per-second: 10
+
+  # Monitoring
+  monitoring:
+    sip-trace: true
+    log-level: DEBUG
+    metrics-enabled: true

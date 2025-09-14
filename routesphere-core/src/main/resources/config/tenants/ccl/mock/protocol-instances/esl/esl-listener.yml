@@ -1,0 +1,55 @@
+esl-listener:
+  instance-id: ccl-mock-esl-01
+  enabled: true
+
+  # Mock ESL configuration for testing
+  connection:
+    mode: mock  # Special mode for testing without real FreeSWITCH
+    mock-delay-ms: 10
+    mock-failure-rate: 0.0  # 0-1, probability of simulated failure
+
+  # Tenant identification configuration
+  tenant-identifier:
+    # Similar to FreeSWITCH context concept - identifies which tenant/context this ESL instance belongs to
+    context: ccl-mock
+    tenant-id: ccl
+    environment: mock
+
+    # Channel variable patterns to identify tenant from incoming calls
+    channel-patterns:
+      - variable: "sip_h_X-Tenant-ID"
+        pattern: "ccl"
+      - variable: "context"
+        pattern: "ccl-mock-.*"
+
+  # Mock event generation
+  mock-events:
+    enabled: true
+    scenarios:
+      - name: basic-call
+        events:
+          - type: CHANNEL_CREATE
+            delay-ms: 0
+          - type: CHANNEL_ANSWER
+            delay-ms: 2000
+          - type: CHANNEL_HANGUP
+            delay-ms: 10000
+
+  # Processing pipeline configuration
+  pipeline:
+    # Initial context for call flow analysis (like FreeSWITCH dialplan context)
+    initial-context: public
+
+    # Processors to apply for ESL events
+    processors:
+      - tenant-identification
+      - admission-control
+      - business-rules
+      - routing-decision
+      - action-execution
+
+  # Monitoring and health check
+  monitoring:
+    health-check-interval-seconds: 60
+    metrics-enabled: false
+    log-level: TRACE

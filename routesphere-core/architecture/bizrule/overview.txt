@@ -1,0 +1,12 @@
+in routesphere for processing sip/sms we need processign the request through a series of steps or business rules (interface BizRule)
+
+business will iterate should nested tenants (reseller), unlimited level. follow the Tenant class.
+
+1. each step or rule should perform a business logic
+2. each steps will compute a value against a fixed fat context common in all steps
+3. failing in each each rule should have decisions to either abort or continue with the next rule
+3. BizRule: let's implement 2 impls first
+	a. IdentifyRootTenant
+	b. IdentifyPartner (who's sending the call)
+	c. various other rules that we will gradually implement
+here's the instruction and entities for identifying root tenants and the logic:
