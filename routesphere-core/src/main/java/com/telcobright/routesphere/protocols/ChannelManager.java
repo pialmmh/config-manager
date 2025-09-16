@@ -70,19 +70,22 @@ public class ChannelManager {
                 List<AbstractChannel> channels = new ArrayList<>();
 
                 for (ChannelConfig config : channelConfigs) {
+                    // Skip disabled channels completely
+                    if (!config.isEnabled()) {
+                        LOG.infof("Skipping disabled channel: %s", config.getName());
+                        continue;
+                    }
+
                     try {
                         AbstractChannel channel = createChannel(config);
                         if (channel != null) {
                             channels.add(channel);
                             channelRegistry.put(config.getName(), channel);
 
-                            if (config.isEnabled()) {
-                                channel.initialize();
-                                LOG.infof("Started %s channel: %s",
-                                    config.getProtocol(), config.getName());
-                            } else {
-                                LOG.debugf("Channel %s is disabled", config.getName());
-                            }
+                            // Initialize the enabled channel
+                            channel.initialize();
+                            LOG.infof("Started %s channel: %s",
+                                config.getProtocol(), config.getName());
                         }
                     } catch (Exception e) {
                         LOG.errorf("Failed to create channel %s: %s",

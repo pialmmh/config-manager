@@ -41,11 +41,14 @@ public class ChannelConfigLoader {
             // Load channels for each active tenant
             for (TenantConfig tenant : tenantsConfig.getTenants()) {
                 if (tenant.isActive()) {
+                    LOG.infof("Loading channels for active tenant: %s (profile: %s)", tenant.getName(), tenant.getProfile());
                     List<ChannelConfig> channels = loadTenantChannels(tenant.getName(), tenant.getProfile());
                     if (!channels.isEmpty()) {
                         tenantChannels.put(tenant.getName(), channels);
                         LOG.infof("Loaded %d channels for tenant %s", channels.size(), tenant.getName());
                     }
+                } else {
+                    LOG.infof("Skipping inactive tenant: %s", tenant.getName());
                 }
             }
         } catch (Exception e) {
@@ -107,7 +110,7 @@ public class ChannelConfigLoader {
                                     config.setProtocol(protocol);
                                 }
                                 channels.add(config);
-                                LOG.debugf("Loaded channel config: %s", file.getFileName());
+                                LOG.debugf("Loaded channel config: %s (enabled: %s)", file.getFileName(), config.isEnabled());
                             }
                         } catch (Exception e) {
                             LOG.errorf("Error loading channel config from %s: %s",
