@@ -2,7 +2,7 @@ package com.telcobright.routesphere.protocols.esl;
 
 import com.telcobright.routesphere.protocols.base.ClientChannel;
 import com.telcobright.routesphere.protocols.base.ChannelConfig;
-import com.telcobright.routesphere.pipeline.call.CallEventProcessor;
+import com.telcobright.routesphere.pipeline.call.esl.CallEventProcessor;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.List;

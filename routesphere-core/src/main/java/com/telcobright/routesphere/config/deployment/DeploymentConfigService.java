@@ -1,6 +1,5 @@
 package com.telcobright.routesphere.config.deployment;
 
-import com.telcobright.routesphere.config.GlobalConfigService;
 import io.quarkus.runtime.Startup;
 import io.quarkus.runtime.StartupEvent;
 import io.smallrye.config.ConfigMapping;
@@ -21,9 +20,6 @@ import java.util.Optional;
 @ApplicationScoped
 @Startup
 public class DeploymentConfigService {
-    
-    @Inject
-    GlobalConfigService globalConfig;
     
     @ConfigProperty(name = "routesphere.tenant.id")
     String tenantId;
@@ -53,22 +49,13 @@ public class DeploymentConfigService {
     
     /**
      * Initialize deployment configuration on startup
-     * Runs after GlobalConfigService (Priority 2)
      */
     void onStart(@Observes @Priority(2) StartupEvent event) {
         System.out.println("\n========================================");
         System.out.println(" Loading Deployment Configuration");
         System.out.println("========================================\n");
         
-        // Override with global config values
-        String globalTenant = globalConfig.getActiveTenant();
-        String globalProfile = globalConfig.getActiveProfile();
-        
-        System.out.println("Global Config:");
-        System.out.println("  Active Tenant: " + globalTenant);
-        System.out.println("  Active Profile: " + globalProfile);
-        
-        System.out.println("\nDeployment Config:");
+        System.out.println("Deployment Config:");
         System.out.println("  Tenant ID: " + tenantId);
         System.out.println("  Tenant Name: " + tenantName);
         System.out.println("  Config Profile: " + activeProfile);

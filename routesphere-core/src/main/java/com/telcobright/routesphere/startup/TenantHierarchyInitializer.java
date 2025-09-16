@@ -2,7 +2,6 @@ package com.telcobright.routesphere.startup;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.telcobright.rtc.domainmodel.nonentity.Tenant;
-import com.telcobright.routesphere.config.GlobalConfigService;
 import com.telcobright.routesphere.config.deployment.DeploymentConfigService;
 import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -23,9 +22,6 @@ import java.io.IOException;
 public class TenantHierarchyInitializer {
 
     @Inject
-    GlobalConfigService globalConfig;
-
-    @Inject
     DeploymentConfigService deploymentConfig;
 
     private final ObjectMapper objectMapper = new ObjectMapper()
@@ -43,19 +39,14 @@ public class TenantHierarchyInitializer {
         System.out.println(" Fetching Tenant from ConfigManager");
         System.out.println("========================================\n");
 
-        String activeProfile = globalConfig.getActiveProfile();
-
-        if (!"mock".equals(activeProfile)) {
-            try {
-                rootTenant = loadFromConfigManager();
-                if (rootTenant != null) {
-                    System.out.println("Successfully received Tenant: " + rootTenant.getDbName());
-                }
-            } catch (Exception e) {
-                System.err.println("Failed to load from ConfigManager: " + e.getMessage());
+        // Always try to load from ConfigManager if available
+        try {
+            rootTenant = loadFromConfigManager();
+            if (rootTenant != null) {
+                System.out.println("Successfully received Tenant: " + rootTenant.getDbName());
             }
-        } else {
-            System.out.println("Mock profile - skipping ConfigManager fetch");
+        } catch (Exception e) {
+            System.err.println("Failed to load from ConfigManager: " + e.getMessage());
         }
     }
 
