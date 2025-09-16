@@ -1,0 +1,7 @@
+# Brilliant Tenant Configuration
+# Specifies the active tenant and profile
+
+tenant:
+  name: brilliant
+  active: true
+  profile: dev  # Active profile: dev, staging, prod, or mock

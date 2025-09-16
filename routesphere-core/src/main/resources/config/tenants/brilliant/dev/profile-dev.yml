@@ -1,0 +1,27 @@
+# Brilliant Development Profile Configuration
+
+profile:
+  name: dev
+  environment: development
+
+  # ConfigManager integration
+  configmanager:
+    url: http://localhost:7070
+    enabled: true
+
+  # Logging configuration
+  logging:
+    level: DEBUG
+    console: true
+    file: /var/log/routesphere/brilliant-dev.log
+
+  # Database configuration
+  database:
+    name: brilliant_dev
+    host: 127.0.0.1
+    port: 3306
+
+  # Performance settings
+  performance:
+    max-concurrent-calls: 1000
+    worker-threads: 10

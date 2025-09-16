@@ -1,0 +1,28 @@
+# SIP Channel - Public Profile
+# Server mode - listens for incoming SIP traffic
+
+channel:
+  name: sip-public
+  mode: server  # Listens on IP:Port
+  protocol: sip
+  enabled: true
+
+  listener:
+    host: 0.0.0.0
+    port: 5060
+    transport: UDP
+
+  sip:
+    user-agent: RouteSphere/1.0
+    realm: brilliant.com
+    max-forwards: 70
+
+  security:
+    auth-required: true
+    allowed-ips:
+      - 192.168.0.0/16
+      - 10.0.0.0/8
+
+  pipeline:
+    name: sip-processing-pipeline
+    async: false

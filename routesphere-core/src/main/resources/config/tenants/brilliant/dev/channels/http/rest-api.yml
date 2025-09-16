@@ -1,0 +1,31 @@
+# HTTP Channel - REST API
+# Server mode - listens for HTTP/REST requests
+
+channel:
+  name: rest-api
+  mode: server  # Listens on IP:Port
+  protocol: http
+  enabled: true
+
+  listener:
+    host: 0.0.0.0
+    port: 8090
+    context-path: /api/v1
+
+  http:
+    methods:
+      - POST
+      - GET
+    endpoints:
+      - /calls
+      - /events
+      - /status
+
+  security:
+    auth-type: bearer-token
+    cors-enabled: true
+
+  pipeline:
+    name: api-processing-pipeline
+    async: false
+    timeout: 30000  # milliseconds

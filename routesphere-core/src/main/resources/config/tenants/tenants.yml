@@ -1,0 +1,15 @@
+# RouteSphere Multi-Tenant Configuration
+# Lists all tenants and their active profiles
+
+tenants:
+  - name: ccl
+    active: true
+    profile: dev  # Active profile: dev, staging, prod, or mock
+
+  - name: brilliant
+    active: true
+    profile: dev  # Active profile: dev, staging, prod, or mock
+
+  - name: reseller-premium
+    active: false
+    profile: dev  # Not active, but profile specified for when activated

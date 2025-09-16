@@ -1,0 +1,24 @@
+# Kafka Channel - Event Consumer
+# Client mode - connects to Kafka broker and consumes events
+
+channel:
+  name: kafka-events
+  mode: client  # Connects to Kafka broker
+  protocol: kafka
+  enabled: true
+
+  connection:
+    bootstrap-servers: localhost:9092
+    group-id: brilliant-routesphere-consumer
+    auto-offset-reset: earliest
+
+  consumer:
+    topics:
+      - call-events
+      - billing-events
+    poll-timeout: 1000  # milliseconds
+    max-poll-records: 100
+
+  pipeline:
+    name: event-processing-pipeline
+    async: true
