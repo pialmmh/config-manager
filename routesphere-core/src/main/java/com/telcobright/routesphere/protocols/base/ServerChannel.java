@@ -1,4 +1,4 @@
-package com.telcobright.routesphere.channel;
+package com.telcobright.routesphere.protocols.base;
 
 /**
  * Base class for server-mode channels.

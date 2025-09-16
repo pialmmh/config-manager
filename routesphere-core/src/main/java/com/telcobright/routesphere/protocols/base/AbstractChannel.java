@@ -1,4 +1,4 @@
-package com.telcobright.routesphere.channel;
+package com.telcobright.routesphere.protocols.base;
 
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
