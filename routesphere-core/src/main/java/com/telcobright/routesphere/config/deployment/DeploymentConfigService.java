@@ -22,10 +22,10 @@ import java.util.Optional;
 public class DeploymentConfigService {
     
     @ConfigProperty(name = "routesphere.tenant.id")
-    String tenantId;
-    
+    Optional<String> tenantId;
+
     @ConfigProperty(name = "routesphere.tenant.name")
-    String tenantName;
+    Optional<String> tenantName;
     
     @ConfigProperty(name = "routesphere.tenant.active-profile", defaultValue = "dev")
     String activeProfile;
@@ -56,8 +56,8 @@ public class DeploymentConfigService {
         System.out.println("========================================\n");
         
         System.out.println("Deployment Config:");
-        System.out.println("  Tenant ID: " + tenantId);
-        System.out.println("  Tenant Name: " + tenantName);
+        System.out.println("  Tenant ID: " + tenantId.orElse("not configured"));
+        System.out.println("  Tenant Name: " + tenantName.orElse("not configured"));
         System.out.println("  Config Profile: " + activeProfile);
         
         // Log database configuration
