@@ -196,7 +196,26 @@ public class ChannelConfigLoader {
         }
 
         try {
-            return yamlMapper.readValue(is, TenantsConfig.class);
+            // Parse the entire YAML file first
+            Map<String, Object> fullYaml = yamlMapper.readValue(is, Map.class);
+
+            // Extract just the tenants section
+            List<Map<String, Object>> tenantsList = (List<Map<String, Object>>) fullYaml.get("tenants");
+
+            TenantsConfig config = new TenantsConfig();
+            if (tenantsList != null) {
+                List<TenantConfig> tenants = new ArrayList<>();
+                for (Map<String, Object> tenantMap : tenantsList) {
+                    TenantConfig tenant = new TenantConfig();
+                    tenant.setName((String) tenantMap.get("name"));
+                    tenant.setEnabled(Boolean.parseBoolean(tenantMap.get("enabled").toString()));
+                    tenant.setProfile((String) tenantMap.get("profile"));
+                    tenants.add(tenant);
+                }
+                config.setTenants(tenants);
+            }
+
+            return config;
         } finally {
             is.close();
         }
