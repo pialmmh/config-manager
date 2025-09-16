@@ -50,6 +50,12 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.15.2</version>
         </dependency>
+        <!-- Jackson JSR310 for Java 8 Date/Time support -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.15.2</version>
+        </dependency>
         <!-- Apache HttpClient for REST calls -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
@@ -74,7 +80,9 @@
             <artifactId>quarkus-config-yaml</artifactId>
             <version>${quarkus.platform.version}</version>
         </dependency>
-        <!-- Quarkus Kafka Streams -->
+        <!-- Quarkus Kafka Streams - COMMENTED OUT FOR NOW -->
+        <!-- Uncomment when Kafka is configured -->
+        <!--
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-kafka-client</artifactId>
@@ -85,6 +93,7 @@
             <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
             <version>${quarkus.platform.version}</version>
         </dependency>
+        -->
         <!-- Quarkus REST/RESTEasy Reactive -->
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -97,7 +106,9 @@
             <version>${quarkus.platform.version}</version>
         </dependency>
 
-        <!-- JPA/Hibernate for entity classes -->
+        <!-- JPA/Hibernate for entity classes - COMMENTED OUT FOR NOW -->
+        <!-- Uncomment these when you need database access -->
+        <!--
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-hibernate-orm</artifactId>
@@ -108,6 +119,7 @@
             <artifactId>quarkus-hibernate-orm-panache</artifactId>
             <version>${quarkus.platform.version}</version>
         </dependency>
+        -->
 
         <!-- Jakarta Persistence API -->
         <dependency>
@@ -148,8 +160,32 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>${quarkus.platform.group-id}</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>generate-code</goal>
+                            <goal>generate-code-tests</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                        <maven.home>${maven.home}</maven.home>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>

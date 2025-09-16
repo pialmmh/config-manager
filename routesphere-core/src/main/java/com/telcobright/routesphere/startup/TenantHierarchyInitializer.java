@@ -28,7 +28,8 @@ public class TenantHierarchyInitializer {
     @Inject
     DeploymentConfigService deploymentConfig;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .findAndRegisterModules(); // Register JSR310 module for Java 8 date/time
     private Tenant rootTenant;
 
     // API endpoint path
@@ -74,16 +75,29 @@ public class TenantHierarchyInitializer {
 
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 int statusCode = response.getCode();
+                System.out.println("API Response Status Code: " + statusCode);
 
                 if (statusCode == 200) {
                     String responseBody = EntityUtils.toString(response.getEntity());
+                    System.out.println("API Response Body (first 500 chars): " +
+                        (responseBody.length() > 500 ? responseBody.substring(0, 500) + "..." : responseBody));
+
                     // Parse JSON response directly to Tenant from rtc.domainmodel.nonentity
-                    return objectMapper.readValue(responseBody, Tenant.class);
+                    Tenant tenant = objectMapper.readValue(responseBody, Tenant.class);
+                    System.out.println("Successfully parsed Tenant object: " + tenant.getDbName());
+                    System.out.println("Tenant has " + (tenant.getChildren() != null ? tenant.getChildren().size() : 0) + " children");
+                    return tenant;
                 } else {
                     System.err.println("ConfigManager API returned status: " + statusCode);
+                    if (response.getEntity() != null) {
+                        String errorBody = EntityUtils.toString(response.getEntity());
+                        System.err.println("Error response body: " + errorBody);
+                    }
                     return null;
                 }
             } catch (Exception e) {
+                System.err.println("Exception during API call: " + e.getMessage());
+                e.printStackTrace();
                 throw new IOException("Failed to fetch from ConfigManager: " + e.getMessage(), e);
             }
         }
