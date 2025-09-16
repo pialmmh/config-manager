@@ -1,19 +1,21 @@
-# ESL Channel - Primary FreeSWITCH Connection
-# Client mode - connects to main FreeSWITCH server
+# ESL Channel - FreeSWITCH Instance 01
+# Primary FreeSWITCH ESL connection
 
 channel:
-  name: ccl-esl-primary
+  name: ccl-esl-freeswitch-01
   mode: client  # Connects to FreeSWITCH server
   protocol: esl
-  enabled: true
+  enabled: true  # Active instance
 
+  # Connection settings for FreeSWITCH ESL
   connection:
-    host: 192.168.1.10
+    host: localhost
     port: 8021
     password: ClueCon
     reconnect: true
     reconnect-delay: 5000  # milliseconds
 
+  # Event subscriptions
   subscriptions:
     - CHANNEL_CREATE
     - CHANNEL_ANSWER
@@ -22,10 +24,13 @@ channel:
     - CUSTOM
     - HEARTBEAT
 
+  # Processing pipeline configuration
   pipeline:
-    name: call-processing-pipeline
+    name: ccl-call-processing-pipeline
     async: true
 
+  # Monitoring and health check
   monitoring:
     health-check-interval: 30
     metrics-enabled: true
+    log-level: INFO

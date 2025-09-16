@@ -1,71 +1,49 @@
-http-listener:
-  instance-id: ccl-dev-http-01
-  enabled: true
+# HTTP Channel - REST API Listener
+# Server mode - provides REST API endpoints
+
+channel:
+  name: ccl-http-api
+  mode: server  # Listens on IP:Port
+  protocol: http
+  enabled: true  # Active instance
 
   # HTTP server configuration
-  server:
+  listener:
     host: 0.0.0.0
-    port: 8080
+    port: 8090
     context-path: /api/ccl
 
-  # Tenant identification configuration
-  tenant-identifier:
-    # Context similar to routing context in web applications
-    context: ccl-dev
-    tenant-id: ccl
-    environment: dev
-
-    # Patterns to identify tenant from HTTP requests
-    identification-methods:
-      - type: header
-        name: X-Tenant-ID
-        pattern: "ccl"
-      - type: subdomain
-        pattern: "ccl-dev\\..*"
-      - type: path
-        pattern: "/api/ccl/.*"
-      - type: query-param
-        name: tenant
-        pattern: "ccl"
-
-  # Request routing configuration
-  routing:
-    # Initial context for request processing
-    initial-context: public
-
-    # Route definitions
-    routes:
-      - path: /health
-        method: GET
-        public: true
-      - path: /api/ccl/**
-        methods: [GET, POST, PUT, DELETE]
-        requires-auth: true
-
-  # Processing pipeline configuration
-  pipeline:
-    processors:
-      - tenant-identification
-      - authentication
-      - authorization
-      - rate-limiting
-      - business-rules
-      - routing-decision
-      - action-execution
+  # HTTP specific configuration
+  http:
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    endpoints:
+      - /health
+      - /status
+      - /calls
+      - /events
 
   # Security configuration
   security:
-    cors:
-      enabled: true
-      allowed-origins: ["http://localhost:3000"]
-      allowed-methods: [GET, POST, PUT, DELETE, OPTIONS]
+    auth-type: bearer-token
+    cors-enabled: true
+    allowed-origins:
+      - http://localhost:3000
+      - https://ccl.example.com
+    rate-limit: 100  # requests per minute
 
-    rate-limiting:
-      enabled: true
-      requests-per-minute: 100
+  # Processing pipeline
+  pipeline:
+    name: http-api-pipeline
+    async: false
+    timeout: 30000  # milliseconds
 
   # Monitoring
   monitoring:
     metrics-enabled: true
-    log-level: DEBUG
     access-log: true
+    log-level: INFO

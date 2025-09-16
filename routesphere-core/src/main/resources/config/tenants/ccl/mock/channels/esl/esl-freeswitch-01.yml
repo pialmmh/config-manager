@@ -1,11 +1,11 @@
-# ESL Channel - Main Listener
-# Client mode - main FreeSWITCH ESL connection
+# ESL Channel - FreeSWITCH Instance 01
+# Primary FreeSWITCH ESL connection
 
 channel:
-  name: ccl-esl-main
+  name: ccl-esl-freeswitch-01
   mode: client  # Connects to FreeSWITCH server
   protocol: esl
-  enabled: true
+  enabled: true  # Active instance
 
   # Connection settings for FreeSWITCH ESL
   connection:
@@ -26,14 +26,8 @@ channel:
 
   # Processing pipeline configuration
   pipeline:
-    name: ccl-call-pipeline
+    name: ccl-call-processing-pipeline
     async: true
-
-  # Tenant identification configuration
-  tenant-identifier:
-    context: ccl-dev
-    tenant-id: ccl
-    environment: dev
 
   # Monitoring and health check
   monitoring:
