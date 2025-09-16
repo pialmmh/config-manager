@@ -1,6 +1,6 @@
 sip-listener:
   instance-id: ccl-prod-sip-01
-  enabled: true
+  enabled: false
 
   # SIP server configuration
   server:
@@ -34,7 +34,7 @@ sip-listener:
 
     # NAT handling
     nat:
-      enabled: true
+      enabled: false
       external-ip: 103.95.96.77
       external-rtp-ip: 103.95.96.77
 
@@ -65,7 +65,7 @@ sip-listener:
 
   # Registration settings
   registration:
-    enabled: true
+    enabled: false
     expire-seconds: 1800
     min-expire: 60
     max-registrations-per-user: 3
@@ -131,13 +131,13 @@ sip-listener:
 
     # DDoS protection
     ddos-protection:
-      enabled: true
+      enabled: false
       threshold-pps: 1000
       block-duration-seconds: 300
 
   # High availability
   high-availability:
-    enabled: true
+    enabled: false
     virtual-ip: 103.95.96.70
     peers:
       - host: 103.95.96.78
@@ -158,9 +158,9 @@ sip-listener:
   monitoring:
     sip-trace: false  # Disabled in production for performance
     log-level: WARN
-    metrics-enabled: true
+    metrics-enabled: false
     alerting:
-      enabled: true
+      enabled: false
       thresholds:
         failed-registrations-per-minute: 100
         failed-calls-per-minute: 50

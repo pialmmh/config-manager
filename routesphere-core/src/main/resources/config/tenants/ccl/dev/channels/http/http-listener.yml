@@ -5,7 +5,7 @@ channel:
   name: ccl-http-api
   mode: server  # Listens on IP:Port
   protocol: http
-  enabled: true  # Active instance
+  enabled: false  # Active instance
 
   # HTTP server configuration
   listener:
@@ -30,7 +30,7 @@ channel:
   # Security configuration
   security:
     auth-type: bearer-token
-    cors-enabled: true
+    cors-enabled: false
     allowed-origins:
       - http://localhost:3000
       - https://ccl.example.com
@@ -44,6 +44,6 @@ channel:
 
   # Monitoring
   monitoring:
-    metrics-enabled: true
+    metrics-enabled: false
     access-log: true
     log-level: INFO

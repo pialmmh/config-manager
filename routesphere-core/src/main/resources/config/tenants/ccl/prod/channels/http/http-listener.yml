@@ -1,6 +1,6 @@
 http-listener:
   instance-id: ccl-prod-http-01
-  enabled: true
+  enabled: false
 
   # HTTP server configuration
   server:
@@ -8,7 +8,7 @@ http-listener:
     port: 443
     context-path: /api/ccl
     ssl:
-      enabled: true
+      enabled: false
       keystore: ${SSL_KEYSTORE_PATH}
       keystore-password: ${SSL_KEYSTORE_PASSWORD}
       trust-store: ${SSL_TRUSTSTORE_PATH}
@@ -63,13 +63,13 @@ http-listener:
   # Security configuration
   security:
     cors:
-      enabled: true
+      enabled: false
       allowed-origins: ["https://ccl.com", "https://app.ccl.com"]
       allowed-methods: [GET, POST, PUT, DELETE, OPTIONS]
       allowed-headers: ["Authorization", "Content-Type", "X-Tenant-ID"]
 
     rate-limiting:
-      enabled: true
+      enabled: false
       requests-per-minute: 1000
       burst-size: 100
 
@@ -80,13 +80,13 @@ http-listener:
 
   # Load balancing
   load-balancing:
-    enabled: true
+    enabled: false
     instances: 3
     strategy: least-connections
 
   # Monitoring
   monitoring:
-    metrics-enabled: true
+    metrics-enabled: false
     log-level: WARN
     access-log: true
     slow-request-threshold-ms: 1000

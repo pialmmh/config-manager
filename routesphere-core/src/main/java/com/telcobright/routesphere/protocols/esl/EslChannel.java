@@ -36,17 +36,31 @@ public class EslChannel extends ClientChannel {
 
     @Override
     protected void connect() throws Exception {
+        LOG.infof("========================================");
+        LOG.infof("ESL Channel: %s", name);
         LOG.infof("Connecting to FreeSWITCH ESL at %s:%d", remoteHost, remotePort);
+        LOG.infof("Password: %s", password != null ? "***" : "not set");
+        LOG.infof("========================================");
 
+        // BREAKPOINT 1: Set breakpoint here to debug ESL connection
         eslClient = new EslClient(remoteHost, remotePort, password);
         eslClient.setEventHandler(this::handleEslEvent);
-        eslClient.connect();
+
+        try {
+            LOG.info("Attempting ESL connection...");
+            eslClient.connect();
+            LOG.info("ESL connection established successfully!");
+        } catch (Exception e) {
+            LOG.errorf("Failed to connect to ESL: %s", e.getMessage());
+            throw e;
+        }
 
         // Subscribe to configured events
         if (subscriptions != null && !subscriptions.isEmpty()) {
+            LOG.infof("Subscribing to %d events", subscriptions.size());
             for (String event : subscriptions) {
                 eslClient.subscribe(event);
-                LOG.debugf("Subscribed to ESL event: %s", event);
+                LOG.infof("  ✓ Subscribed to: %s", event);
             }
         }
     }

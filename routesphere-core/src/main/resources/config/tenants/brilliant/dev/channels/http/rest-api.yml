@@ -5,7 +5,7 @@ channel:
   name: rest-api
   mode: server  # Listens on IP:Port
   protocol: http
-  enabled: true
+  enabled: false
 
   listener:
     host: 0.0.0.0
@@ -23,7 +23,7 @@ channel:
 
   security:
     auth-type: bearer-token
-    cors-enabled: true
+    cors-enabled: false
 
   pipeline:
     name: api-processing-pipeline

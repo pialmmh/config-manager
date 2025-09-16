@@ -5,7 +5,7 @@ channel:
   name: ccl-sip-public
   mode: server  # Listens on IP:Port
   protocol: sip
-  enabled: true
+  enabled: false
 
   listener:
     host: 0.0.0.0

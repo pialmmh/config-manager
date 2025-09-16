@@ -7,7 +7,7 @@ tenants:
     profile: dev  # Active profile: dev, staging, prod, or mock
 
   - name: brilliant
-    active: true
+    active: false
     profile: dev  # Active profile: dev, staging, prod, or mock
 
   - name: reseller-premium

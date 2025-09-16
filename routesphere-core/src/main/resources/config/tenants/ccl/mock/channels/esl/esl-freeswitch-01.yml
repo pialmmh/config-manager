@@ -5,7 +5,7 @@ channel:
   name: ccl-esl-freeswitch-01
   mode: client  # Connects to FreeSWITCH server
   protocol: esl
-  enabled: true  # Active instance
+  enabled: false  # Active instance
 
   # Connection settings for FreeSWITCH ESL
   connection:
@@ -32,5 +32,5 @@ channel:
   # Monitoring and health check
   monitoring:
     health-check-interval: 30
-    metrics-enabled: true
+    metrics-enabled: false
     log-level: INFO
