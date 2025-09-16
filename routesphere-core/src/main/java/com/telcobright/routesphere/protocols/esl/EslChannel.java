@@ -5,13 +5,15 @@ import com.telcobright.routesphere.protocols.base.ChannelConfig;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
 import java.util.Map;
+import org.freeswitch.esl.client.IEslEventListener;
+import org.freeswitch.esl.client.transport.event.EslEvent;
 
 /**
  * ESL (Event Socket Library) Channel implementation.
  * Connects to FreeSWITCH Event Socket to receive call events.
  */
 @ApplicationScoped
-public class EslChannel extends ClientChannel {
+public class EslChannel extends ClientChannel implements IEslEventListener {
 
     private EslClient eslClient;
     private String password;
@@ -43,7 +45,7 @@ public class EslChannel extends ClientChannel {
         LOG.infof("========================================");
 
         // BREAKPOINT 1: Set breakpoint here to debug ESL connection
-        eslClient = new EslClient(remoteHost, remotePort, password);
+        eslClient = new EslClient(this, remoteHost, remotePort, password);
         eslClient.setEventHandler(this::handleEslEvent);
 
         try {
@@ -77,7 +79,7 @@ public class EslChannel extends ClientChannel {
     /**
      * Handle incoming ESL events
      */
-    private void handleEslEvent(EslEvent event) {
+    private void handleEslEvent(com.telcobright.routesphere.protocols.esl.EslEvent event) {
         LOG.debugf("Received ESL event: %s", event.getEventName());
 
         // Convert ESL event to pipeline event
@@ -91,6 +93,23 @@ public class EslChannel extends ClientChannel {
 
         // Trigger pipeline processing
         processEvent(pipelineEvent);
+    }
+
+    // IEslEventListener implementation
+    @Override
+    public void eventReceived(EslEvent eslEvent) {
+        LOG.debugf("Received FreeSWITCH event: %s", eslEvent.getEventName());
+        // Convert to our EslEvent and handle
+        com.telcobright.routesphere.protocols.esl.EslEvent event =
+            new com.telcobright.routesphere.protocols.esl.EslEvent(eslEvent.getEventName());
+        event.setChannelId(eslEvent.getEventHeaders().get("Channel-Unique-ID"));
+        event.setEventData(eslEvent.getEventHeaders());
+        handleEslEvent(event);
+    }
+
+    @Override
+    public void backgroundJobResultReceived(EslEvent eslEvent) {
+        LOG.debugf("Received background job result: %s", eslEvent.getEventName());
     }
 
     @Override

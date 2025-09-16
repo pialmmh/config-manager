@@ -29,7 +29,7 @@ public class ChannelConfigLoader {
     private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
     /**
-     * Load all channel configurations for active tenants
+     * Load all channel configurations for enabled tenants
      */
     public Map<String, List<ChannelConfig>> loadAllChannelConfigs() {
         Map<String, List<ChannelConfig>> tenantChannels = new HashMap<>();
@@ -38,17 +38,17 @@ public class ChannelConfigLoader {
             // Load the main tenants configuration
             TenantsConfig tenantsConfig = loadTenantsConfig();
 
-            // Load channels for each active tenant
+            // Load channels for each enabled tenant
             for (TenantConfig tenant : tenantsConfig.getTenants()) {
-                if (tenant.isActive()) {
-                    LOG.infof("Loading channels for active tenant: %s (profile: %s)", tenant.getName(), tenant.getProfile());
+                if (tenant.isEnabled()) {
+                    LOG.infof("Loading channels for enabled tenant: %s (profile: %s)", tenant.getName(), tenant.getProfile());
                     List<ChannelConfig> channels = loadTenantChannels(tenant.getName(), tenant.getProfile());
                     if (!channels.isEmpty()) {
                         tenantChannels.put(tenant.getName(), channels);
                         LOG.infof("Loaded %d channels for tenant %s", channels.size(), tenant.getName());
                     }
                 } else {
-                    LOG.infof("Skipping inactive tenant: %s", tenant.getName());
+                    LOG.infof("Skipping disabled tenant: %s", tenant.getName());
                 }
             }
         } catch (Exception e) {
@@ -241,7 +241,7 @@ public class ChannelConfigLoader {
      */
     public static class TenantConfig {
         private String name;
-        private boolean active;
+        private boolean enabled;
         private String profile;
 
         public String getName() {
@@ -252,12 +252,12 @@ public class ChannelConfigLoader {
             this.name = name;
         }
 
-        public boolean isActive() {
-            return active;
+        public boolean isEnabled() {
+            return enabled;
         }
 
-        public void setActive(boolean active) {
-            this.active = active;
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
         }
 
         public String getProfile() {
