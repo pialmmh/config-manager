@@ -1,0 +1,28 @@
+# ESL Channel - Monitoring Instance
+# Client mode - connects to FreeSWITCH for monitoring only
+
+channel:
+  name: ccl-esl-monitoring
+  mode: client  # Connects to FreeSWITCH server
+  protocol: esl
+  enabled: false  # Can be enabled when needed
+
+  connection:
+    host: 192.168.1.10
+    port: 8021
+    password: ClueCon
+    reconnect: true
+    reconnect-delay: 10000  # milliseconds
+
+  subscriptions:
+    - HEARTBEAT
+    - CUSTOM
+    - SYSTEM
+
+  pipeline:
+    name: monitoring-pipeline
+    async: true
+
+  monitoring:
+    health-check-interval: 10
+    metrics-enabled: true

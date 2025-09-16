@@ -1,5 +1,10 @@
-esl-listener:
-  instance-id: ccl-dev-esl-01
+# ESL Channel - Main Listener
+# Client mode - main FreeSWITCH ESL connection
+
+channel:
+  name: ccl-esl-main
+  mode: client  # Connects to FreeSWITCH server
+  protocol: esl
   enabled: true
 
   # Connection settings for FreeSWITCH ESL
@@ -7,27 +12,11 @@ esl-listener:
     host: localhost
     port: 8021
     password: ClueCon
-    reconnect-interval-seconds: 5
-    connection-timeout-seconds: 10
-
-  # Tenant identification configuration
-  tenant-identifier:
-    # Similar to FreeSWITCH context concept - identifies which tenant/context this ESL instance belongs to
-    context: ccl-dev
-    tenant-id: ccl
-    environment: dev
-
-    # Channel variable patterns to identify tenant from incoming calls
-    channel-patterns:
-      - variable: "sip_h_X-Tenant-ID"
-        pattern: "ccl"
-      - variable: "context"
-        pattern: "ccl-dev-.*"
-      - variable: "sip_profile"
-        pattern: "ccl-dev"
+    reconnect: true
+    reconnect-delay: 5000  # milliseconds
 
   # Event subscriptions
-  events:
+  subscriptions:
     - CHANNEL_CREATE
     - CHANNEL_ANSWER
     - CHANNEL_HANGUP
@@ -37,19 +26,17 @@ esl-listener:
 
   # Processing pipeline configuration
   pipeline:
-    # Initial context for call flow analysis (like FreeSWITCH dialplan context)
-    initial-context: public
+    name: ccl-call-pipeline
+    async: true
 
-    # Processors to apply for ESL events
-    processors:
-      - tenant-identification
-      - admission-control
-      - business-rules
-      - routing-decision
-      - action-execution
+  # Tenant identification configuration
+  tenant-identifier:
+    context: ccl-dev
+    tenant-id: ccl
+    environment: dev
 
   # Monitoring and health check
   monitoring:
-    health-check-interval-seconds: 30
+    health-check-interval: 30
     metrics-enabled: true
     log-level: INFO

@@ -1,0 +1,27 @@
+# SIP Channel - Private Profile
+# Server mode - listens for internal SIP traffic
+
+channel:
+  name: ccl-sip-private
+  mode: server  # Listens on IP:Port
+  protocol: sip
+  enabled: true
+
+  listener:
+    host: 192.168.1.100
+    port: 5080
+    transport: UDP
+
+  sip:
+    user-agent: RouteSphere-CCL-Internal/1.0
+    realm: private.ccl.local
+    max-forwards: 70
+
+  security:
+    auth-required: false  # Internal network, no auth needed
+    allowed-ips:
+      - 192.168.1.0/24  # Only internal network
+
+  pipeline:
+    name: private-sip-pipeline
+    async: false
