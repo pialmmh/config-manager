@@ -1,90 +1,15 @@
-# RouteSphere Application Configuration
-# Supports multiple tenants with multiple profiles
+# RouteSphere Multi-Tenant Configuration
+# Lists all tenants and their profiles
 
-quarkus:
-  profile: dev
-  http:
-    port: 8081
-    host: 0.0.0.0
-  log:
-    level: INFO
-    category:
-      "com.telcobright.routesphere":
-        level: DEBUG
+tenants:
+  - name: ccl
+    enabled: true
+    profile: dev  # Profile: dev, staging, prod, or mock
 
-# RouteSphere Configuration
-routesphere:
-  # Active tenant selection
-  active:
-    tenant: ccl          # Current tenant (ccl, telcobright_root, etc.)
-    profile: ${quarkus.profile}  # Active profile (dev, staging, prod, mock)
-  
-  # Configuration paths
-  config:
-    tenants:
-      path: config/tenants
-  
-  # Default/Root tenant configuration
-  tenant:
-    id: telcobright_root
-    name: TelcoBright Root Organization
-    type: ROOT
-    active-profile: ${quarkus.profile}
-    active: true
-    
-    # Root tenant profiles
-    profiles:
-      dev:
-        general:
-          database:
-            url: jdbc:mysql://127.0.0.1:3306/routesphere_dev
-            username: root
-            password: "123456"
-          config-manager:
-            base-url: http://localhost:7070
-          kafka:
-            bootstrap-servers: localhost:9092
-      
-      prod:
-        general:
-          database:
-            url: ${DB_URL:jdbc:mysql://db.prod:3306/routesphere}
-            username: ${DB_USER:routesphere}
-            password: ${DB_PASSWORD}
-          config-manager:
-            base-url: ${CONFIG_MANAGER_URL:https://config.prod}
-          kafka:
-            bootstrap-servers: ${KAFKA_SERVERS:kafka.prod:9092}
+  - name: brilliant
+    enabled: false
+    profile: dev  # Profile: dev, staging, prod, or mock
 
-# CCL Tenant Configuration (when active.tenant=ccl)
-"%ccl":
-  routesphere:
-    tenant:
-      id: ccl
-      name: CCL Communications Ltd
-      type: END_USER
-      parent-id: telcobright_root
-      active-profile: ${quarkus.profile}
-      
-      profiles:
-        dev:
-          general:
-            database:
-              url: jdbc:mysql://127.0.0.1:3306/ccl_dev
-              username: ccl_dev
-              password: ccl_dev_pass
-            config-manager:
-              base-url: http://localhost:7070
-            kafka:
-              bootstrap-servers: localhost:9092
-        
-        prod:
-          general:
-            database:
-              url: ${CCL_DB_URL:jdbc:mysql://ccl-db.prod:3306/ccl_prod}
-              username: ${CCL_DB_USER:ccl_prod}
-              password: ${CCL_DB_PASSWORD}
-            config-manager:
-              base-url: ${CCL_CONFIG_URL:https://config.ccl.prod}
-            kafka:
-              bootstrap-servers: ${CCL_KAFKA:kafka.ccl.prod:9092}
+  - name: reseller-premium
+    enabled: false
+    profile: dev  # Profile specified for when enabled

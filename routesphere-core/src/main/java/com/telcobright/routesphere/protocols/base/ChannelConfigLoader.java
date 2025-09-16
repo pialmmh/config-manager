@@ -8,6 +8,7 @@ import org.jboss.logging.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -184,16 +185,21 @@ public class ChannelConfigLoader {
     }
 
     /**
-     * Load the main tenants configuration
+     * Load the main tenants configuration from application.yml
      */
     private TenantsConfig loadTenantsConfig() throws IOException {
-        Path tenantsFile = getResourcePath(CONFIG_BASE_PATH + "/tenants.yml");
-        if (tenantsFile == null || !Files.exists(tenantsFile)) {
-            LOG.warn("tenants.yml not found, using default configuration");
+        // Load from application.yml in the resources root
+        InputStream is = getClass().getClassLoader().getResourceAsStream("application.yml");
+        if (is == null) {
+            LOG.warn("application.yml not found, using default configuration");
             return new TenantsConfig();
         }
 
-        return yamlMapper.readValue(tenantsFile.toFile(), TenantsConfig.class);
+        try {
+            return yamlMapper.readValue(is, TenantsConfig.class);
+        } finally {
+            is.close();
+        }
     }
 
     /**
