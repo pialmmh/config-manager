@@ -32,7 +32,7 @@ public class EslClient {
     public void connect() throws Exception {
         client = new Client();
         try {
-            client.connect(host, port, "ClueCon", 10);
+            client.connect(host, port, password, 10);
             client.addEventListener(listener);
             client.setEventSubscriptions("plain", "all");
         } catch (InboundConnectionFailure inboundConnectionFailure) {
