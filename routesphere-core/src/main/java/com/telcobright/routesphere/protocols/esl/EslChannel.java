@@ -2,7 +2,9 @@ package com.telcobright.routesphere.protocols.esl;
 
 import com.telcobright.routesphere.protocols.base.ClientChannel;
 import com.telcobright.routesphere.protocols.base.ChannelConfig;
+import com.telcobright.routesphere.pipeline.call.CallEventProcessor;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import org.freeswitch.esl.client.IEslEventListener;
@@ -14,6 +16,9 @@ import org.freeswitch.esl.client.transport.event.EslEvent;
  */
 @ApplicationScoped
 public class EslChannel extends ClientChannel implements IEslEventListener {
+
+    @Inject
+    CallEventProcessor callEventProcessor;
 
     private EslClient eslClient;
     private String password;
@@ -91,20 +96,41 @@ public class EslChannel extends ClientChannel implements IEslEventListener {
             "data", event.getEventData()
         );
 
-        // Trigger pipeline processing
+        // Send to CallEventProcessor for detailed logging and processing
+        if (callEventProcessor != null) {
+            callEventProcessor.processCallEvent(pipelineEvent);
+        }
+
+        // Also trigger pipeline processing
         processEvent(pipelineEvent);
     }
 
     // IEslEventListener implementation
     @Override
     public void eventReceived(EslEvent eslEvent) {
-        LOG.debugf("Received FreeSWITCH event: %s", eslEvent.getEventName());
-        // Convert to our EslEvent and handle
-        com.telcobright.routesphere.protocols.esl.EslEvent event =
-            new com.telcobright.routesphere.protocols.esl.EslEvent(eslEvent.getEventName());
-        event.setChannelId(eslEvent.getEventHeaders().get("Channel-Unique-ID"));
-        event.setEventData(eslEvent.getEventHeaders());
-        handleEslEvent(event);
+        String eventName = eslEvent.getEventName();
+
+        // Skip heartbeat debug logging to reduce noise
+        if (!"HEARTBEAT".equals(eventName)) {
+            LOG.debugf("Received FreeSWITCH event: %s", eventName);
+        }
+
+        // Convert FreeSWITCH event directly to pipeline event format
+        Map<String, Object> pipelineEvent = Map.of(
+            "type", "esl",
+            "eventName", eventName,
+            "channelId", eslEvent.getEventHeaders().getOrDefault("Channel-Unique-ID", ""),
+            "timestamp", System.currentTimeMillis(),
+            "data", eslEvent.getEventHeaders()
+        );
+
+        // Send to CallEventProcessor for detailed logging and processing
+        if (callEventProcessor != null) {
+            callEventProcessor.processCallEvent(pipelineEvent);
+        }
+
+        // Also trigger pipeline processing
+        processEvent(pipelineEvent);
     }
 
     @Override
