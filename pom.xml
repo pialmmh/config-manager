@@ -85,10 +85,8 @@
     <!-- Add your real module folders here -->
     <modules>
         <module>routesphere-core</module>
-        <module>statemachine</module>
-        <module>partitioned-repo</module>
-        <module>infinite-scheduler</module>
-        <module>chronicle-db-Cache</module>
+        <module>split-verse</module>
+        <module>mem-ledger</module>
         <module>util</module>
     </modules>
 </project>
