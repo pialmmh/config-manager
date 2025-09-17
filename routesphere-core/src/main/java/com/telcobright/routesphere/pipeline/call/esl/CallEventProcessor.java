@@ -67,9 +67,7 @@ public class CallEventProcessor {
         handleSpecificEvent(eventType, channelId, eventData);
     }
 
-    /**
-     * Handle specific event types with custom logic
-     */
+
     private void handleSpecificEvent(String eventType, String channelId, Map<String, ?> eventData) {
         if (eventType == null) {
             return;
@@ -88,6 +86,36 @@ public class CallEventProcessor {
             case "CHANNEL_HANGUP_COMPLETE":
                 handleChannelHangupComplete(channelId, eventData);
                 break;
+            case "CHANNEL_PARK":
+                handleChannelPark(channelId, eventData);
+                break;
+            case "CHANNEL_UNPARK":
+                handleChannelUnpark(channelId, eventData);
+                break;
+            case "CHANNEL_BRIDGE":
+                handleChannelBridge(channelId, eventData);
+                break;
+            case "CHANNEL_UNBRIDGE":
+                handleChannelUnbridge(channelId, eventData);
+                break;
+            case "CHANNEL_EXECUTE":
+                handleChannelExecute(channelId, eventData);
+                break;
+            case "CHANNEL_EXECUTE_COMPLETE":
+                handleChannelExecuteComplete(channelId, eventData);
+                break;
+            case "CHANNEL_PROGRESS":
+                handleChannelProgress(channelId, eventData);
+                break;
+            case "CHANNEL_PROGRESS_MEDIA":
+                handleChannelProgressMedia(channelId, eventData);
+                break;
+            case "CHANNEL_OUTGOING":
+                handleChannelOutgoing(channelId, eventData);
+                break;
+            case "CHANNEL_ORIGINATE":
+                handleChannelOriginate(channelId, eventData);
+                break;
             case "HEARTBEAT":
                 // Log heartbeats at DEBUG level to reduce noise
                 LOG.debugf("FreeSWITCH Heartbeat received");
@@ -95,8 +123,20 @@ public class CallEventProcessor {
             case "CUSTOM":
                 handleCustomEvent(channelId, eventData);
                 break;
+            case "DTMF":
+                handleDtmfEvent(channelId, eventData);
+                break;
+            case "RE_SCHEDULE":
+                LOG.debugf("Re-schedule event received for channel: %s", channelId);
+                break;
+            case "API":
+                handleApiEvent(channelId, eventData);
+                break;
             default:
-                LOG.debugf("Unhandled event type: %s", eventType);
+                // Log unknown events for discovery
+                if (!eventType.equals("HEARTBEAT")) {
+                    LOG.debugf("Unhandled event type: %s", eventType);
+                }
         }
     }
 
@@ -150,6 +190,120 @@ public class CallEventProcessor {
         if (eventData != null) {
             String subclass = (String) eventData.get("Event-Subclass");
             LOG.infof("🔧 CUSTOM EVENT - Subclass: %s, Channel: %s", subclass, channelId);
+        }
+    }
+
+    private void handleChannelPark(String channelId, Map<String, ?> eventData) {
+        LOG.infof("⏸️ CALL PARKED - Channel: %s", channelId);
+
+        if (eventData != null) {
+            String parkingSlot = (String) eventData.get("variable_park_slot");
+            String parkedBy = (String) eventData.get("variable_park_by");
+            LOG.infof("   Parking Slot: %s, Parked By: %s", parkingSlot, parkedBy);
+        }
+    }
+
+    private void handleChannelUnpark(String channelId, Map<String, ?> eventData) {
+        LOG.infof("▶️ CALL UNPARKED - Channel: %s", channelId);
+
+        if (eventData != null) {
+            String retrievedBy = (String) eventData.get("variable_retrieved_by");
+            LOG.infof("   Retrieved By: %s", retrievedBy);
+        }
+    }
+
+    private void handleChannelBridge(String channelId, Map<String, ?> eventData) {
+        LOG.infof("🔗 CALL BRIDGED - Channel: %s", channelId);
+
+        if (eventData != null) {
+            String otherLegUuid = (String) eventData.get("Other-Leg-Unique-ID");
+            String bridgeState = (String) eventData.get("variable_bridge_channel");
+            LOG.infof("   Other Leg: %s, Bridge Channel: %s",
+                truncateString(otherLegUuid, 20), bridgeState);
+        }
+    }
+
+    private void handleChannelUnbridge(String channelId, Map<String, ?> eventData) {
+        LOG.infof("🔓 CALL UNBRIDGED - Channel: %s", channelId);
+
+        if (eventData != null) {
+            String unbridgeCause = (String) eventData.get("variable_bridge_hangup_cause");
+            LOG.infof("   Unbridge Cause: %s", unbridgeCause);
+        }
+    }
+
+    private void handleChannelExecute(String channelId, Map<String, ?> eventData) {
+        if (eventData != null) {
+            String application = (String) eventData.get("Application");
+            String applicationData = (String) eventData.get("Application-Data");
+            LOG.debugf("⚡ EXECUTING: %s(%s) on Channel: %s",
+                application, applicationData, channelId);
+        }
+    }
+
+    private void handleChannelExecuteComplete(String channelId, Map<String, ?> eventData) {
+        if (eventData != null) {
+            String application = (String) eventData.get("Application");
+            String response = (String) eventData.get("Application-Response");
+            LOG.debugf("✓ EXECUTED: %s - Response: %s, Channel: %s",
+                application, response, channelId);
+        }
+    }
+
+    private void handleChannelProgress(String channelId, Map<String, ?> eventData) {
+        LOG.infof("📡 CALL PROGRESS - Channel: %s", channelId);
+
+        if (eventData != null) {
+            String progressIndication = (String) eventData.get("variable_progress_indication");
+            LOG.infof("   Progress Indication: %s", progressIndication);
+        }
+    }
+
+    private void handleChannelProgressMedia(String channelId, Map<String, ?> eventData) {
+        LOG.infof("🎵 EARLY MEDIA - Channel: %s", channelId);
+
+        if (eventData != null) {
+            String codecName = (String) eventData.get("variable_rtp_use_codec_name");
+            String codecRate = (String) eventData.get("variable_rtp_use_codec_rate");
+            LOG.infof("   Codec: %s @ %s", codecName, codecRate);
+        }
+    }
+
+    private void handleChannelOutgoing(String channelId, Map<String, ?> eventData) {
+        LOG.infof("📤 OUTGOING CALL - Channel: %s", channelId);
+
+        if (eventData != null) {
+            String destinationNumber = (String) eventData.get("Caller-Destination-Number");
+            String gateway = (String) eventData.get("variable_sip_gateway");
+            LOG.infof("   To: %s via Gateway: %s", destinationNumber, gateway);
+        }
+    }
+
+    private void handleChannelOriginate(String channelId, Map<String, ?> eventData) {
+        LOG.infof("🚀 CALL ORIGINATED - Channel: %s", channelId);
+
+        if (eventData != null) {
+            String originateDisposition = (String) eventData.get("variable_originate_disposition");
+            String dialedExtension = (String) eventData.get("variable_dialed_extension");
+            LOG.infof("   Disposition: %s, Dialed: %s", originateDisposition, dialedExtension);
+        }
+    }
+
+    private void handleDtmfEvent(String channelId, Map<String, ?> eventData) {
+        if (eventData != null) {
+            String dtmfDigit = (String) eventData.get("DTMF-Digit");
+            String dtmfDuration = (String) eventData.get("DTMF-Duration");
+            LOG.infof("☎️ DTMF RECEIVED - Digit: %s, Duration: %sms, Channel: %s",
+                dtmfDigit, dtmfDuration, channelId);
+        }
+    }
+
+    private void handleApiEvent(String channelId, Map<String, ?> eventData) {
+        if (eventData != null) {
+            String apiCommand = (String) eventData.get("API-Command");
+            String apiResponse = (String) eventData.get("API-Response");
+            LOG.debugf("🔌 API EVENT - Command: %s, Response: %s",
+                apiCommand, truncateString(apiResponse, 100));
         }
     }
 

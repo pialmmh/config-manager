@@ -4,6 +4,7 @@ import com.telcobright.routesphere.protocols.base.ClientChannel;
 import com.telcobright.routesphere.protocols.base.ChannelConfig;
 import com.telcobright.routesphere.pipeline.call.esl.CallEventProcessor;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,16 @@ public class EslChannel extends ClientChannel implements IEslEventListener {
 
         if (config.getProtocolSpecificConfig() != null) {
             this.subscriptions = (List<String>) config.getProtocolSpecificConfig().get("subscriptions");
+        }
+
+        // Get CallEventProcessor from CDI when created manually
+        if (callEventProcessor == null) {
+            try {
+                callEventProcessor = CDI.current().select(CallEventProcessor.class).get();
+                LOG.debug("CallEventProcessor obtained from CDI");
+            } catch (Exception e) {
+                LOG.warn("Could not obtain CallEventProcessor from CDI: " + e.getMessage());
+            }
         }
     }
 
@@ -97,8 +108,20 @@ public class EslChannel extends ClientChannel implements IEslEventListener {
         );
 
         // Send to CallEventProcessor for detailed logging and processing
+        if (callEventProcessor == null) {
+            // Try to get it from CDI if not already set
+            try {
+                callEventProcessor = CDI.current().select(CallEventProcessor.class).get();
+                LOG.debug("CallEventProcessor obtained from CDI in event handler");
+            } catch (Exception e) {
+                LOG.warn("Could not obtain CallEventProcessor from CDI: " + e.getMessage());
+            }
+        }
+
         if (callEventProcessor != null) {
             callEventProcessor.processCallEvent(pipelineEvent);
+        } else {
+            LOG.warn("CallEventProcessor is not available, event not processed");
         }
 
         // Also trigger pipeline processing
@@ -125,8 +148,20 @@ public class EslChannel extends ClientChannel implements IEslEventListener {
         );
 
         // Send to CallEventProcessor for detailed logging and processing
+        if (callEventProcessor == null) {
+            // Try to get it from CDI if not already set
+            try {
+                callEventProcessor = CDI.current().select(CallEventProcessor.class).get();
+                LOG.debug("CallEventProcessor obtained from CDI in event handler");
+            } catch (Exception e) {
+                LOG.warn("Could not obtain CallEventProcessor from CDI: " + e.getMessage());
+            }
+        }
+
         if (callEventProcessor != null) {
             callEventProcessor.processCallEvent(pipelineEvent);
+        } else {
+            LOG.warn("CallEventProcessor is not available, event not processed");
         }
 
         // Also trigger pipeline processing
