@@ -1,5 +1,6 @@
 package com.telcobright.routesphere.pipeline.call.esl;
 
+import io.quarkus.arc.Unremovable;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.jboss.logging.Logger;
 import java.time.Instant;
@@ -14,6 +15,7 @@ import java.util.Map;
  * and will be gradually developed to process call flows.
  */
 @ApplicationScoped
+@Unremovable  // Prevent Quarkus from removing this bean during build-time optimization
 public class CallEventProcessor {
 
     private static final Logger LOG = Logger.getLogger(CallEventProcessor.class);

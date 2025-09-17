@@ -9,7 +9,7 @@ channel:
 
   # Connection settings for FreeSWITCH ESL
   connection:
-    host: 103.95.96.983
+    host: 103.95.96.766
     port: 8021
     password: ClueCon
     reconnect: true
