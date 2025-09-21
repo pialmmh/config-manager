@@ -87,6 +87,6 @@
         <module>routesphere-core</module>
         <module>split-verse</module>
         <module>mem-ledger</module>
-        <module>util</module>
+        <module>db-util</module>
     </modules>
 </project>

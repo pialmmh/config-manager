@@ -219,7 +219,7 @@
                                     <goal>java</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>com.telcobright.util.db.SpringToQuarkusEntityConverter</mainClass>
+                                    <mainClass>com.telcobright.util.db.conversion.SpringToQuarkusEntityConverter</mainClass>
                                     <classpathScope>compile</classpathScope>
                                     <arguments>
                                         <!-- Source: ConfigManager domain models -->

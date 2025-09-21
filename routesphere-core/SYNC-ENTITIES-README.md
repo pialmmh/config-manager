@@ -60,7 +60,7 @@ mvn clean compile
 The sync task is configured with:
 - **Source**: `../RTC-Manager/ConfigManager/src/main/java/com/telcobright/rtc/domainmodel`
 - **Destination**: `src/main/java/com/telcobright/rtc/domainmodel`
-- **Converter**: `com.telcobright.util.db.SpringToQuarkusEntityConverter`
+- **Converter**: `com.telcobright.util.db.conversion.SpringToQuarkusEntityConverter`
 
 ## Dependencies Required
 
